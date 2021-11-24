@@ -108,6 +108,20 @@ err:
     return ret;
 }
 
+static esp_err_t ws2812_set_pixels(led_strip_t *strip, uint32_t off, uint32_t len, const uint8_t* color_buffer) 
+{
+    esp_err_t ret = ESP_OK;
+    ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);
+    STRIP_CHECK((off+len-1 < ws2812->strip_len) && len>0, "index out of the maximum number of leds", err, ESP_ERR_INVALID_ARG);
+    
+    // Color buffer should respect GRB format
+    memcpy(&ws2812->buffer[off], color_buffer, len*3);
+
+    return ESP_OK;
+err:
+    return ret;
+}
+
 static esp_err_t ws2812_refresh(led_strip_t *strip, uint32_t timeout_ms)
 {
     esp_err_t ret = ESP_OK;
@@ -161,6 +175,7 @@ led_strip_t *led_strip_new_rmt_ws2812(const led_strip_config_t *config)
     ws2812->strip_len = config->max_leds;
 
     ws2812->parent.set_pixel = ws2812_set_pixel;
+    ws2812->parent.set_pixels = ws2812_set_pixels;
     ws2812->parent.refresh = ws2812_refresh;
     ws2812->parent.clear = ws2812_clear;
     ws2812->parent.del = ws2812_del;

@@ -53,6 +53,16 @@ struct led_strip_s {
     esp_err_t (*set_pixel)(led_strip_t *strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue);
 
     /**
+     * @brief Set RGB by color array
+     * @param strip: LED strip
+     * @param off: Offset on LED strip
+     * @param len: Number of LEDs in collor buffer
+     * @param color_buffer: Buffer of colors in GRB format
+     * 
+     */
+    esp_err_t (*set_pixels)(led_strip_t *strip, uint32_t off, uint32_t len, const uint8_t* color_buffer);
+
+    /**
     * @brief Refresh memory colors to LEDs
     *
     * @param strip: LED strip
