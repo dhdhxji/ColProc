@@ -12,7 +12,7 @@
 #include "esp_log.h"
 #include "driver/rmt.h"
 #include "led_strip.h"
-#include "colproc_defs.h"
+#include "colproc/defs.h"
 
 static const char *TAG = "example";
 
