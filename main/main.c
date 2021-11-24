@@ -1,4 +1,4 @@
-/* Hello World Example
+/* RMT example -- RGB LED Strip
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -6,38 +6,72 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
-#include <stdio.h>
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "esp_log.h"
+#include "driver/rmt.h"
+#include "led_strip.h"
+#include "colproc_defs.h"
+
+static const char *TAG = "example";
+
+#define RMT_TX_CHANNEL RMT_CHANNEL_0
+
+#define EXAMPLE_CHASE_SPEED_MS (10)
+
 
 void app_main(void)
 {
-    printf("Hello world!\n");
 
-    /* Print chip information */
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    printf("This is %s chip with %d CPU cores, WiFi%s%s, ",
-            CONFIG_IDF_TARGET,
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+    rmt_config_t config = RMT_DEFAULT_CONFIG_TX(13, RMT_TX_CHANNEL);
+    // set counter clock to 40MHz
+    config.clk_div = 2;
 
-    printf("silicon revision %d, ", chip_info.revision);
+    ESP_ERROR_CHECK(rmt_config(&config));
+    ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));
 
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+    // install ws2812 driver
+    led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(5, (led_strip_dev_t)config.channel);
+    led_strip_t *strip = led_strip_new_rmt_ws2812(&strip_config);
+    if (!strip) {ESP_LOGE(TAG, "install WS2812 driver failed");}
+    ESP_ERROR_CHECK(strip->clear(strip, 100));
+    
 
-    printf("Free heap: %d\n", esp_get_free_heap_size());
+    color_t colors[] = {
+        {
+            .r = 50,
+            .g = 0,
+            .b = 0
+        },
+        {
+            .r = 0,
+            .g = 50, 
+            .b = 0
+        },
+        {
+            .r = 0,
+            .g = 0,
+            .b = 0
+        },
+        {
+            .r = 25,
+            .g = 25,
+            .b = 0
+        },
+        {
+            .r = 25,
+            .g = 0,
+            .b = 25
+        }
+    };
 
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
+    ESP_ERROR_CHECK(strip->set_pixels(
+        strip, 
+        0, 
+        sizeof(colors)/sizeof(colors[0]), 
+        (const uint8_t*)colors)
+    );
+
+    ESP_ERROR_CHECK(strip->refresh(strip, 100));
 }
