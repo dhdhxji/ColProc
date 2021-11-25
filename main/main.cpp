@@ -9,22 +9,36 @@
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_timer.h"
 #include "esp_log.h"
 #include "driver/rmt.h"
 #include "led_strip.h"
+
 #include "colproc/defs.h"
+#include "colproc/colproc.h"
+#include "colproc/gen/random.h"
 
 static const char *TAG = "example";
 
 #define RMT_TX_CHANNEL RMT_CHANNEL_0
-
 #define EXAMPLE_CHASE_SPEED_MS (10)
 
+
+#define LED_COUNT 5
+static color_t color_buf[LED_COUNT];
+
+static ColProc* build_processor() {
+    return new ColRpocGenRandom(2000);
+}
+
+extern "C" {
+    void app_main(void);
+}
 
 void app_main(void)
 {
 
-    rmt_config_t config = RMT_DEFAULT_CONFIG_TX(13, RMT_TX_CHANNEL);
+    rmt_config_t config = RMT_DEFAULT_CONFIG_TX(GPIO_NUM_13, RMT_TX_CHANNEL);
     // set counter clock to 40MHz
     config.clk_div = 2;
 
@@ -32,46 +46,23 @@ void app_main(void)
     ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));
 
     // install ws2812 driver
-    led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(5, (led_strip_dev_t)config.channel);
+    led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(LED_COUNT, (led_strip_dev_t)config.channel);
     led_strip_t *strip = led_strip_new_rmt_ws2812(&strip_config);
     if (!strip) {ESP_LOGE(TAG, "install WS2812 driver failed");}
     ESP_ERROR_CHECK(strip->clear(strip, 100));
-    
 
-    color_t colors[] = {
-        {
-            .r = 50,
-            .g = 0,
-            .b = 0
-        },
-        {
-            .r = 0,
-            .g = 50, 
-            .b = 0
-        },
-        {
-            .r = 0,
-            .g = 0,
-            .b = 0
-        },
-        {
-            .r = 25,
-            .g = 25,
-            .b = 0
-        },
-        {
-            .r = 25,
-            .g = 0,
-            .b = 25
-        }
-    };
+    ColProc* processor = build_processor();
 
-    ESP_ERROR_CHECK(strip->set_pixels(
-        strip, 
-        0, 
-        sizeof(colors)/sizeof(colors[0]), 
-        (const uint8_t*)colors)
-    );
+    for(;;) {
+        uint32_t time = esp_timer_get_time() / 1000;
 
-    ESP_ERROR_CHECK(strip->refresh(strip, 100));
+        processor->get_colors(time, color_buf, LED_COUNT);
+        ESP_ERROR_CHECK(
+            strip->set_pixels(strip, 0,LED_COUNT, 
+            (const uint8_t*)(color_buf))
+        );
+
+        ESP_ERROR_CHECK(strip->refresh(strip, 100));
+    }
+
 }
