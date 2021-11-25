@@ -19,9 +19,16 @@ public:
         time = time / _period;
 
         for(size_t i = 0; i < count; ++i) {
-            colors[i].g = hash(time<<20 | i<<10 | 1,  255, 255);
-            colors[i].r = hash(time<<20 | i<<10 | 2,  255, 255);
-            colors[i].b = hash(time<<20 | i<<10 | 3,  255, 255);
+            uint32_t h = hash((time+1)*(i+1) + 1, 0, 360);
+            uint32_t s = hash((time+1)*(i+1) + 2, 90, 100);
+            uint32_t v = 100;
+    
+            hsv2rgb(
+                h, s, v, 
+                &colors[i].r, 
+                &colors[i].g, 
+                &colors[i].b
+            );
         }
     }
 
