@@ -14,22 +14,23 @@
 #include "driver/rmt.h"
 #include "led_strip.h"
 
-#include "colproc/defs.h"
 #include "colproc/colproc.h"
 #include "colproc/gen/random.h"
+
+#include "display_loop.h"
 
 static const char *TAG = "example";
 
 #define RMT_TX_CHANNEL RMT_CHANNEL_0
 #define EXAMPLE_CHASE_SPEED_MS (10)
 
-
 #define LED_COUNT 5
-static color_t color_buf[LED_COUNT];
+#define REFRESH_RATE_HZ 60
 
 static ColProc* build_processor() {
     return new ColRpocGenRandom(2000);
 }
+
 
 extern "C" {
     void app_main(void);
@@ -53,16 +54,5 @@ void app_main(void)
 
     ColProc* processor = build_processor();
 
-    for(;;) {
-        uint32_t time = esp_timer_get_time() / 1000;
-
-        processor->get_colors(time, color_buf, LED_COUNT);
-        ESP_ERROR_CHECK(
-            strip->set_pixels(strip, 0,LED_COUNT, 
-            (const uint8_t*)(color_buf))
-        );
-
-        ESP_ERROR_CHECK(strip->refresh(strip, 100));
-    }
-
+    display_loop_start(processor, strip, LED_COUNT, REFRESH_RATE_HZ);
 }
