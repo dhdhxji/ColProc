@@ -45,7 +45,7 @@ void display_loop_start(
     ctx->strip = strip;
     ctx->buffer = new color_t[led_count];
 
-    uint32_t period_freertos_ticks = (1000 * portTICK_PERIOD_MS)/refresh_rate;
+    uint32_t period_freertos_ticks = (1000/(refresh_rate*portTICK_PERIOD_MS));
 
     TimerHandle_t tim = xTimerCreate(
         "LED", 
