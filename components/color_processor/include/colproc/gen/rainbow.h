@@ -25,7 +25,7 @@ public:
         for(size_t i = 0; i < count; ++i) {
             uint32_t h = (time+i*360/_length)%360;
             uint32_t s = 100;
-            uint32_t v = 1;
+            uint32_t v = 100;
     
             hsv2rgb(
                 h, s, v, 
