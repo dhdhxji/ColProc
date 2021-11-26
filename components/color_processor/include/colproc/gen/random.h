@@ -4,10 +4,10 @@
 #include "generator.h"
 #include "../util/util.h"
 
-class ColRpocGenRandom: public ColProcGen
+class ColProcGenRandom: public ColProcGen
 {
 public:
-    ColRpocGenRandom(uint32_t period) {
+    ColProcGenRandom(uint32_t period) {
         _period = period;
     }
 
