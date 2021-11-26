@@ -15,7 +15,7 @@
 #include "led_strip.h"
 
 #include "colproc/colproc.h"
-#include "colproc/gen/random.h"
+#include "colproc/gen/rainbow.h"
 
 #include "display_loop.h"
 
@@ -28,7 +28,7 @@ static const char *TAG = "example";
 #define REFRESH_RATE_HZ 60
 
 static ColProc* build_processor() {
-    return new ColRpocGenRandom(2000);
+    return new ColProcGenRainbow(5, 2000);
 }
 
 
