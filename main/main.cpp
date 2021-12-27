@@ -16,6 +16,7 @@
 
 #include "colproc/colproc.h"
 #include "colproc/gen/rainbow.h"
+#include "colproc/filter/brigtness_scale.h"
 
 #include "display_loop.h"
 
@@ -28,7 +29,8 @@ static const char *TAG = "example";
 #define REFRESH_RATE_HZ 60
 
 static ColProc* build_processor() {
-    return new ColProcGenRainbow(5, 2000);
+    ColProc* gen = new ColProcGenRainbow(5, 2000);
+    return new ColProcFilterBrScale(gen, 1);
 }
 
 
