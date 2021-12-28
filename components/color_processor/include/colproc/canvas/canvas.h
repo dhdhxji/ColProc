@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "colproc/util/util.h"
+#include "colproc/defs.h"
 
 class Canvas
 {
