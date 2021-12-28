@@ -13,14 +13,19 @@ public:
 
     void filter(
         uint32_t time, 
-        color_t* colors,
-        size_t count
+        Canvas* canvas
     ) override {
         if(_br_divider == 0) {return;}
-        for(size_t i = 0; i < count; ++i) {
-            colors[i].r /= _br_divider;
-            colors[i].g /= _br_divider;
-            colors[i].b /= _br_divider;
+        
+        for(size_t y = 0; y < canvas->getH(); ++y) {
+            for(size_t x = 0; x < canvas->getW(); ++x) {
+                ColRGB c = canvas->getPix(x, y);
+                c.r /= _br_divider;
+                c.g /= _br_divider;
+                c.b /= _br_divider;
+
+                canvas->setPix(x, y, c);
+            }
         }
     }
 
