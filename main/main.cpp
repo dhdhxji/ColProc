@@ -15,8 +15,10 @@
 #include "led_strip.h"
 
 #include "colproc/colproc.h"
+#include "colproc/gen/random.h"
 #include "colproc/gen/rainbow.h"
 #include "colproc/filter/brigtness_scale.h"
+#include "colproc/canvas/canvas_console.h"
 
 #include "display_loop.h"
 
@@ -26,11 +28,11 @@ static const char *TAG = "example";
 #define EXAMPLE_CHASE_SPEED_MS (10)
 
 #define LED_COUNT 5
-#define REFRESH_RATE_HZ 60
+#define REFRESH_RATE_HZ 1
 
 static ColProc* build_processor() {
-    ColProc* gen = new ColProcGenRainbow(5, 2000);
-    return new ColProcFilterBrScale(gen, 1);
+    ColProc* gen = new ColProcGenRainbow(110, 2, 5000);
+    return new ColProcFilterBrScale(gen, 1); 
 }
 
 
@@ -40,7 +42,6 @@ extern "C" {
 
 void app_main(void)
 {
-
     rmt_config_t config = RMT_DEFAULT_CONFIG_TX(GPIO_NUM_13, RMT_TX_CHANNEL);
     // set counter clock to 40MHz
     config.clk_div = 2;
@@ -56,5 +57,5 @@ void app_main(void)
 
     ColProc* processor = build_processor();
 
-    display_loop_start(processor, strip, LED_COUNT, REFRESH_RATE_HZ);
+    display_loop_start(processor, new CanvasConsole(19, 9), REFRESH_RATE_HZ);
 }

@@ -6,9 +6,8 @@
 
 void display_loop_start(
     ColProc* processor, 
-    led_strip_t* strip,
-    size_t led_count,
-    uint32_t refresh_rate 
+    Canvas* canvas,
+    uint32_t refresh_rate
 );
 
 #endif // DISPLAY_LOOP_H
