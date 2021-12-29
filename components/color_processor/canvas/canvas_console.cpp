@@ -34,7 +34,8 @@ ColRGB CanvasConsole::getPix(size_t x, size_t y) {
     return _canvas[index];
 };
 
-void CanvasConsole::print() {
+void CanvasConsole::display() {
+    printf("\033[0;0H");
     for(size_t y = 0; y < getH(); ++y) {
         for(size_t x = 0; x < getW(); ++x) {
             ColRGB col = getPix(x, y);

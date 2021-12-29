@@ -8,13 +8,12 @@ class CanvasConsole: public Canvas
 {
 public:
     CanvasConsole(size_t w, size_t h);
+    ~CanvasConsole() override;
 
-    ~CanvasConsole();
+    void setPix(size_t x, size_t y, ColRGB col) override;
+    ColRGB getPix(size_t x, size_t y) override;
 
-    void setPix(size_t x, size_t y, ColRGB col);
-
-    ColRGB getPix(size_t x, size_t y);
-    void print();
+    void display() override;
 
 private:
     ColRGB* _canvas;
