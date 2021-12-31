@@ -45,9 +45,22 @@ void CanvasStrip::display() {
 }
 
 CanvasStrip::color_grb_t* CanvasStrip::_getPixPtr(size_t x, size_t y) {
-    // According to mode transform coordinates to an index
+    // Check bounds
+    if(y >= getH() || x >= getW()) {
+        return nullptr;
+    }
 
-    return nullptr;
+    // According to mode transform coordinates to an index
+    size_t index;
+    if(_mode == MODE_CONTINUOUS) {
+        index = y*getW() + x;
+    } else if(_mode == MODE_ZIGZAG) {
+        index = y*getW() + ( (y%2 == 0) ? x:(getW()-1-x) );
+    } else {
+        return nullptr;
+    }
+
+    return &((color_grb_t*)_color_buffer)[index];
 }
 
 size_t CanvasStrip::_bufferSize() {
