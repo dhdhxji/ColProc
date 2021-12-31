@@ -8,16 +8,14 @@ class ColProcGen: public ColProc
 public:
     virtual void generate(
         uint32_t time, 
-        color_t* colors,
-        size_t count
+        Canvas* canvas
     ) = 0;
 
     void get_colors(
         uint32_t time,
-        color_t* colors, 
-        size_t cnt
+        Canvas* canvas
     ) {
-        generate(time, colors, cnt);
+        generate(time, canvas);
     }
 };
 

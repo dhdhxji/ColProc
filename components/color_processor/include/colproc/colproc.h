@@ -3,14 +3,14 @@
 
 #include <cstddef>
 #include "defs.h"
+#include "colproc/canvas/canvas.h"
 
 class ColProc
 {
 public:
     virtual void get_colors(
         uint32_t time,
-        color_t* colors, 
-        size_t cnt
+        Canvas* canvas
     ) = 0;
 };
 

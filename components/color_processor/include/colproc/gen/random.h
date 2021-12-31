@@ -13,22 +13,22 @@ public:
 
     void generate(
         uint32_t time, 
-        color_t* colors,
-        size_t count
+        Canvas* canvas
     ) {
         time = time / _period;
 
-        for(size_t i = 0; i < count; ++i) {
+        for(size_t i = 0; i < canvas->getH()*canvas->getW(); ++i) {
             uint32_t h = hash((time+1)*(i+1) + 1, 0, 360);
             uint32_t s = hash((time+1)*(i+1) + 2, 90, 100);
             uint32_t v = 100;
-    
-            hsv2rgb(
-                h, s, v, 
-                &colors[i].r, 
-                &colors[i].g, 
-                &colors[i].b
-            );
+            
+            size_t y = i / canvas->getW();
+            size_t x = i % canvas->getW();
+
+            uint8_t r, g, b;
+            hsv2rgb(h, s, v, &r, &g, &b);
+            
+            canvas->setPix(x, y, ColRGB(r, g, b));
         }
     }
 
