@@ -1,13 +1,37 @@
 #include "colproc/canvas/canvas_strip.h"
 
 #include <cstring>
+#include "led_strip.h"
+#include "esp_log.h"
 
-CanvasStrip::CanvasStrip(size_t w, size_t h, strip_mode_t mode): 
+const char* TAG = "CanvasString";
+
+CanvasStrip::CanvasStrip(
+    size_t w, size_t h, 
+    strip_mode_t mode, 
+    rmt_channel_t ch,
+    gpio_num_t pin
+): 
     Canvas(w, h) 
 {
     _color_buffer = new uint8_t[_bufferSize()];
     memset(_color_buffer, 0, _bufferSize());
     _mode = mode;
+
+    rmt_config_t config = RMT_DEFAULT_CONFIG_TX(GPIO_NUM_13, ch);
+    // set counter clock to 40MHz
+    config.clk_div = 2;
+
+    ESP_ERROR_CHECK(rmt_config(&config));
+    ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));
+
+    // install ws2812 driver
+    led_strip_config_t strip_config = 
+        LED_STRIP_DEFAULT_CONFIG(getW()*getH(), (led_strip_dev_t)config.channel);
+    _strip = led_strip_new_rmt_ws2812(&strip_config);
+    
+    if (!_strip) {ESP_LOGE(TAG, "install WS2812 driver failed");}
+    ESP_ERROR_CHECK(_strip->clear(_strip, 100));
 }
 
 CanvasStrip::~CanvasStrip() {
@@ -25,23 +49,22 @@ ColRGB CanvasStrip::getPix(size_t x, size_t y) {
     color_grb_t* pix = _getPixPtr(x, y);
     if(pix != nullptr) {
         return *pix;
+    } else {
+        return ColRGB(0, 0, 0);
     }
 }
 
 void CanvasStrip::display() {
-    /* ESP_ERROR_CHECK(
-        ctx->strip->set_pixels(
-            ctx->strip, 
+    ESP_ERROR_CHECK(
+        _strip->set_pixels(
+            _strip, 
             0,
-            ctx->led_count, 
-            (const uint8_t*)(ctx->buffer)
+            getW() * getH(), 
+            _color_buffer
         )
-        );
+    );
 
-        ESP_ERROR_CHECK(ctx->strip->refresh(ctx->strip, 100));
-    */
-
-    //ctx->buffer = new color_t[led_count];
+    ESP_ERROR_CHECK(_strip->refresh(_strip, 100));
 }
 
 CanvasStrip::color_grb_t* CanvasStrip::_getPixPtr(size_t x, size_t y) {

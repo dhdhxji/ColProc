@@ -2,6 +2,9 @@
 #define CANVAS_STRIP_H
 
 #include "colproc/canvas/canvas.h"
+#include "driver/rmt.h"
+#include "driver/gpio.h"
+#include "led_strip.h"
 
 class CanvasStrip: public Canvas 
 {
@@ -28,7 +31,12 @@ public:
     };
 
 
-    CanvasStrip(size_t w, size_t h, strip_mode_t mode);
+    CanvasStrip(
+        size_t w, size_t h, 
+        strip_mode_t mode, 
+        rmt_channel_t ch,
+        gpio_num_t pin
+    );
     virtual ~CanvasStrip() override;
 
     virtual void setPix(size_t x, size_t y, ColRGB col) override;
@@ -42,6 +50,8 @@ protected:
 
     uint8_t* _color_buffer;
     strip_mode_t _mode;
+
+    led_strip_t* _strip;
 };
 
 #endif // CANVAS_STRIP_H
