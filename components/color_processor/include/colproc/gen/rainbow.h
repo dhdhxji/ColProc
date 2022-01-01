@@ -4,10 +4,10 @@
 #include "generator.h"
 #include "../util/util.h"
 
-class ColProcGenRainbow: public ColProcGen
+class GeneratorRainbow: public Generator
 {
 public:
-    ColProcGenRainbow(
+    GeneratorRainbow(
         size_t length,
         size_t angle,
         uint32_t cycle_period_ms

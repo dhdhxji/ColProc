@@ -3,7 +3,7 @@
 
 #include "../colproc.h"
 
-class ColProcGen: public ColProc
+class Generator: public ColProc
 {
 public:
     virtual void generate(

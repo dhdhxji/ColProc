@@ -4,10 +4,10 @@
 #include "../colproc.h"
 #include "colproc/canvas/canvas.h"
 
-class ColProcFilter: public ColProc 
+class Filter: public ColProc 
 {
 public: 
-    ColProcFilter(ColProc* src) {
+    Filter(ColProc* src) {
         _src = src;
     }
 

@@ -11,8 +11,8 @@
 #define MATRIX_H        7
 
 static ColProc* build_processor() {
-    ColProc* gen = new ColProcGenRainbow(110, 2, 5000);
-    return new ColProcFilterBrScale(gen, 10); 
+    ColProc* gen = new GeneratorRainbow(110, 2, 5000);
+    return new BrightnessScale(gen, 10); 
 }
 
 

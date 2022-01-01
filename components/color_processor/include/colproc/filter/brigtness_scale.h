@@ -3,11 +3,11 @@
 
 #include "filter.h"
 
-class ColProcFilterBrScale: public ColProcFilter
+class BrightnessScale: public Filter
 {
 public: 
-    ColProcFilterBrScale(ColProc* src, uint16_t br_divider)
-    :ColProcFilter(src) {
+    BrightnessScale(ColProc* src, uint16_t br_divider)
+    :Filter(src) {
         _br_divider = br_divider;
     }
 
