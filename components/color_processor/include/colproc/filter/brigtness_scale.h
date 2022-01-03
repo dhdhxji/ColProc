@@ -2,13 +2,14 @@
 #define BRIGTNESS_SCALE_H
 
 #include "filter.h"
+#include "colproc/variable/variable.h"
 
 class ColProcFilterBrScale: public ColProcFilter
 {
 public: 
-    ColProcFilterBrScale(ColProc* src, uint16_t br_divider)
+    ColProcFilterBrScale(ColProc* src, AbstractVariable* br_divider)
     :ColProcFilter(src) {
-        _br_divider = br_divider;
+        _br_divider = br_divider->castToVariable<float>();
     }
 
     void filter(
@@ -20,9 +21,9 @@ public:
         for(size_t y = 0; y < canvas->getH(); ++y) {
             for(size_t x = 0; x < canvas->getW(); ++x) {
                 ColRGB c = canvas->getPix(x, y);
-                c.r /= _br_divider;
-                c.g /= _br_divider;
-                c.b /= _br_divider;
+                c.r /= _br_divider->getValue();
+                c.g /= _br_divider->getValue();
+                c.b /= _br_divider->getValue();
 
                 canvas->setPix(x, y, c);
             }
@@ -30,7 +31,7 @@ public:
     }
 
 private:
-    uint16_t _br_divider;
+    Variable<float>* _br_divider;
 };
 
 #endif // BRIGTNESS_SCALE_H
