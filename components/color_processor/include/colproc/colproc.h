@@ -4,6 +4,7 @@
 #include <cstddef>
 #include "defs.h"
 #include "colproc/canvas/canvas.h"
+#include "colproc/variable/variable.h"
 
 class ColProc
 {

@@ -7,9 +7,9 @@
 class ColProcFilterBrScale: public ColProcFilter
 {
 public: 
-    ColProcFilterBrScale(ColProc* src, AbstractVariable* br_divider)
+    ColProcFilterBrScale(ColProc* src, Variable<float>* br_divider)
     :ColProcFilter(src) {
-        _br_divider = br_divider->castToVariable<float>();
+        _br_divider = br_divider;
     }
 
     void filter(

@@ -32,6 +32,10 @@ public:
         return _value;
     }
 
+    operator T() {
+        return getValue();
+    }
+
     virtual void updateValue() = 0;
 
     const std::type_info& getVariableType() override {
