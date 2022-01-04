@@ -2,6 +2,8 @@
 #include "colproc/gen/rainbow.h"
 #include "colproc/filter/brigtness_scale.h"
 #include "colproc/canvas/canvas_strip.h"
+#include "colproc/canvas/canvas_console.h"
+#include "colproc/variable/variable_constant.h"
 
 #include "display_loop.h"
 
@@ -11,8 +13,15 @@
 #define MATRIX_H        7
 
 static ColProc* build_processor() {
-    ColProc* gen = new GeneratorRainbow(110, 2, 5000);
-    return new BrightnessScale(gen, 10); 
+    ColProc* gen = new GeneratorRainbow(
+        new VariableConstant<uint32_t>(110), 
+        new VariableConstant<uint32_t>(2), 
+        new VariableConstant<uint32_t>(5000)
+    );
+    return new BrightnessScale(
+        gen, 
+        new VariableConstant<float>(2)
+    ); 
 }
 
 
@@ -31,7 +40,7 @@ void app_main(void)
             CanvasStrip::MODE_ZIGZAG, 
             RMT_CHANNEL_0, 
             GPIO_NUM_13
-        ), 
+        ),
         REFRESH_RATE_HZ
     );
 }
