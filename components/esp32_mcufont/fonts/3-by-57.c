@@ -99,7 +99,7 @@ const struct mf_rlefont_s mf_rlefont_3_by_57 = {
     0, /* baseline x */
     5, /* baseline y */
     6, /* line height */
-    1, /* flags */
+    0, /* flags */
     63, /* fallback character */
     &mf_rlefont_character_width,
     &mf_rlefont_render_character,

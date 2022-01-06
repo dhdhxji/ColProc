@@ -1,3 +1,0 @@
-[submodule "components/esp32_mcufont/mcufont"]
-	path = components/esp32_mcufont/mcufont
-	url = https://github.com/mcufont/mcufont.git
