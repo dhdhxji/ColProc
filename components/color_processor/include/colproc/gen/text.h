@@ -5,6 +5,7 @@
 #include "colproc/variable/variable.h"
 #include "mcufont.h"
 #include <string>
+#include <stdexcept>
 
 
 class GeneratorText: public Generator
@@ -28,8 +29,17 @@ public:
             .canv = canvas
         };
         
+        const mf_font_s* font = mf_find_font(_font->getValue().c_str());
+        if(font == nullptr) {
+            throw std::runtime_error(
+                std::string("Font \"") +
+                _font->getValue() + 
+                "\" not found" 
+            );
+        }
+        
         mf_render_aligned(
-            mf_find_font(_font->getValue().c_str()), 
+            font, 
             0,
             0, 
             MF_ALIGN_LEFT,
