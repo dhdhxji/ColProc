@@ -16,7 +16,13 @@ CanvasConsole::~CanvasConsole() {
 
 void CanvasConsole::setPix(size_t x, size_t y, ColRGB col) {
     if(x >= getW() || y >= getH()) {
-        //throw std::runtime_error("Out of bounds in set");
+        throw std::runtime_error(
+            std::string("Out of bounds in setPix(") + 
+            std::to_string(x) + 
+            ";" + 
+            std::to_string(y) + 
+            ")"
+        );
         return;
     }
     size_t index = y*getW() + x;
@@ -25,8 +31,14 @@ void CanvasConsole::setPix(size_t x, size_t y, ColRGB col) {
 }
 
 ColRGB CanvasConsole::getPix(size_t x, size_t y) {
-    if(x >= getW() || y >= getH()) {
-        //throw std::runtime_error("Out of bounds in set");
+    if(x >= getW() || y >= getH()) { 
+        throw std::runtime_error(
+            std::string("Out of bounds in getPix(") + 
+            std::to_string(x) + 
+            ";" + 
+            std::to_string(y) + 
+            ")"
+        );
         return ColRGB(0,0,0);
     }
     size_t index = y*getW() + x;
