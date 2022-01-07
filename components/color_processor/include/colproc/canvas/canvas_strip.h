@@ -40,12 +40,12 @@ public:
     virtual ~CanvasStrip() override;
 
     virtual void setPix(size_t x, size_t y, ColRGB col) override;
-    virtual ColRGB getPix(size_t x, size_t y) override;
+    virtual ColRGB getPix(size_t x, size_t y) const override;
 
-    virtual void display();
+    virtual void display() const override;
 
 protected:
-    color_grb_t* _getPixPtr(size_t x, size_t y);
+    color_grb_t* _getPixPtr(size_t x, size_t y) const;
     size_t _bufferSize();
 
     uint8_t* _color_buffer;

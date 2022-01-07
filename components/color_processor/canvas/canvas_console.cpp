@@ -30,7 +30,7 @@ void CanvasConsole::setPix(size_t x, size_t y, ColRGB col) {
     _canvas[index] = col;
 }
 
-ColRGB CanvasConsole::getPix(size_t x, size_t y) {
+ColRGB CanvasConsole::getPix(size_t x, size_t y) const {
     if(x >= getW() || y >= getH()) { 
         throw std::runtime_error(
             std::string("Out of bounds in getPix(") + 
@@ -46,7 +46,7 @@ ColRGB CanvasConsole::getPix(size_t x, size_t y) {
     return _canvas[index];
 };
 
-void CanvasConsole::display() {
+void CanvasConsole::display() const {
     printf("\033[0;0H");
     for(size_t y = 0; y < getH(); ++y) {
         for(size_t x = 0; x < getW(); ++x) {

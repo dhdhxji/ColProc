@@ -11,9 +11,9 @@ public:
     ~CanvasConsole() override;
 
     void setPix(size_t x, size_t y, ColRGB col) override;
-    ColRGB getPix(size_t x, size_t y) override;
+    ColRGB getPix(size_t x, size_t y) const override;
 
-    void display() override;
+    void display() const override;
 
 private:
     ColRGB* _canvas;

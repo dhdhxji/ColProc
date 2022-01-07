@@ -45,7 +45,7 @@ void CanvasStrip::setPix(size_t x, size_t y, ColRGB col) {
     }
 }
 
-ColRGB CanvasStrip::getPix(size_t x, size_t y) {
+ColRGB CanvasStrip::getPix(size_t x, size_t y) const {
     color_grb_t* pix = _getPixPtr(x, y);
     if(pix != nullptr) {
         return *pix;
@@ -54,7 +54,7 @@ ColRGB CanvasStrip::getPix(size_t x, size_t y) {
     }
 }
 
-void CanvasStrip::display() {
+void CanvasStrip::display() const {
     ESP_ERROR_CHECK(
         _strip->set_pixels(
             _strip, 
@@ -67,7 +67,7 @@ void CanvasStrip::display() {
     ESP_ERROR_CHECK(_strip->refresh(_strip, 100));
 }
 
-CanvasStrip::color_grb_t* CanvasStrip::_getPixPtr(size_t x, size_t y) {
+CanvasStrip::color_grb_t* CanvasStrip::_getPixPtr(size_t x, size_t y) const {
     // Check bounds
     if(y >= getH() || x >= getW()) {
         return nullptr;
