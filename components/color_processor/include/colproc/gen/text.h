@@ -23,7 +23,12 @@ public:
     };
     
 
-    virtual void generate(uint32_t time, Canvas* canvas) override {
+    virtual void generate(
+        int16_t off_x,
+        int16_t off_y,
+        uint32_t time, 
+        Canvas* canvas
+    ) override {
         render_ctx_t ctx = {
             .gen = this,
             .canv = canvas
@@ -40,8 +45,8 @@ public:
         
         mf_render_aligned(
             font, 
-            0,
-            0, 
+            off_x,
+            off_y, 
             MF_ALIGN_LEFT,
             _text->getValue().c_str(),
             _text->getValue().length(),

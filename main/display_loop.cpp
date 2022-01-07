@@ -19,7 +19,7 @@ static void display_timer_cb(TimerHandle_t t) {
     display_loop_ctx* ctx = (display_loop_ctx*)pvTimerGetTimerID(t);
     uint32_t time = esp_timer_get_time() / 1000;
 
-    ctx->proc->get_colors(time, ctx->canvas);
+    ctx->proc->render(time, ctx->canvas);
     ctx->canvas->display();
 }
 
