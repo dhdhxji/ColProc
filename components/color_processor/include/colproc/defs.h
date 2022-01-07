@@ -19,6 +19,20 @@ struct ColRGB {
         g = _g;
         b = _b;
     }
+
+    bool operator==(const ColRGB& o) {
+        return  r == o.r && 
+                g == o.g && 
+                b == o.b;
+    }
+
+    ColRGB operator*(const ColRGB& other) {
+        return ColRGB(
+            (r * other.r)/255,
+            (g * other.g)/255,
+            (b * other.b)/255
+        );
+    }
 };
 
 #endif // COLPROC_DEFS_H
