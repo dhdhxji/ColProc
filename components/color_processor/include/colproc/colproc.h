@@ -9,10 +9,19 @@
 class ColProc
 {
 public:
-    virtual void get_colors(
+    virtual void render(
+        int16_t off_x,
+        int16_t off_y,
         uint32_t time,
         Canvas* canvas
     ) = 0;
+
+    virtual void render(
+        uint32_t time,
+        Canvas* canvas
+    ) {
+        render(0, 0, time, canvas);
+    };
 };
 
 #endif // COLPROC_UNIT_H

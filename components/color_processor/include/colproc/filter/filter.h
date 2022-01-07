@@ -16,11 +16,13 @@ public:
         Canvas* canvas
     ) = 0;
 
-    void get_colors(
+    void render(
+        int16_t off_x,
+        int16_t off_y,
         uint32_t time,
         Canvas* canvas
     ) override {
-        _src->get_colors(time, canvas);
+        _src->render(off_x, off_y, time, canvas);
         filter(time, canvas);
     }
 

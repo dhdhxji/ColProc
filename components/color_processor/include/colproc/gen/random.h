@@ -12,9 +12,11 @@ public:
     }
 
     void generate(
+        int16_t off_x,
+        int16_t off_y,
         uint32_t time, 
         Canvas* canvas
-    ) {
+    ) override {
         time = time / _period;
 
         for(size_t i = 0; i < canvas->getH()*canvas->getW(); ++i) {
