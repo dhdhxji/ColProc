@@ -18,6 +18,8 @@ public:
     virtual void setPix(size_t x, size_t y, ColRGB col) = 0;
     virtual ColRGB getPix(size_t x, size_t y) const = 0;
 
+    virtual void clear();
+
     void traverse(std::function<void(uint16_t, uint16_t)> cb) const;
 
     virtual void display() const = 0;

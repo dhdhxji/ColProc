@@ -13,6 +13,12 @@ size_t Canvas::getH() const {
     return _h;
 }
 
+void Canvas::clear()  {
+    traverse([this](uint16_t x, uint16_t y) {
+        this->setPix(x, y, ColRGB(0, 0, 0));
+    });
+}
+
 void Canvas::traverse(std::function<void(uint16_t, uint16_t)> cb) const {
     for(uint16_t x = 0; x < getW(); ++x) {
         for(uint16_t y = 0; y < getH(); ++y) {

@@ -13,12 +13,12 @@ public:
     }
 
     virtual void updateValue() override {
-        _value = _callback();
+        Variable<T>::_value = _callback();
+        //pritnf("updated value %s\n", )
     }
 
 protected:
     std::function<T()> _callback;
-    T _value;
 };
 
 #endif // VALUE_CALLBACK_H
