@@ -21,6 +21,7 @@ static void display_timer_cb(TimerHandle_t t) {
     uint32_t time = esp_timer_get_time() / 1000;
 
     ctx->storage->updateVariables();
+    ctx->canvas->clear();
     ctx->proc->render(time, ctx->canvas);
     ctx->canvas->display();
 }
