@@ -20,6 +20,8 @@ public:
 
         return dynamic_cast<Variable<T>*>(this);
     }
+
+    virtual void updateValue() = 0;
     
     virtual const std::type_info& getVariableType() = 0;
 };
@@ -35,8 +37,6 @@ public:
     operator T() {
         return getValue();
     }
-
-    virtual void updateValue() = 0;
 
     const std::type_info& getVariableType() override {
         return typeid(T);
