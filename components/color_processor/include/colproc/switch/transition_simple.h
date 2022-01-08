@@ -13,7 +13,7 @@ public:
         Canvas* canvas,
         const TransEntry& transition_ctx,
         uint32_t time_since_start
-    ) override {;
+    ) override {
         transition_ctx.to->render(off_x, off_y, time, canvas);
         return true;
     }
