@@ -1,6 +1,11 @@
-import sys
+import argparse
 
-print(f"hello, i am class parser! arg is {sys.argv[1]}")
+def parse_args():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('-i', help='Inout class directory to analyze')
+    parser.add_argument('-o', help='Class info json output')
 
-with open(sys.argv[4], "w") as f:
-    f.write('{}')
+    return parser.parse_args()
+
+args = parse_args()
+print(args)
