@@ -4,9 +4,11 @@ idf_component_register(
     REQUIRES "led_strip" "esp32_mcufont"
 )
 
+get_target_property(include_dirs_target ${COMPONENT_LIB} INCLUDE_DIRECTORIES)
+
 add_custom_command(
     OUTPUT colproc/classes.json
-    COMMAND python3 ${COMPONENT_DIR}/parse_classes.py -i ${COMPONENT_DIR}/colproc/ -o ./colproc/classes.json
+    COMMAND python3 ${COMPONENT_DIR}/parse_classes.py -i ${COMPONENT_DIR}/include/colproc/ -o ./colproc/classes.json --include_path ${include_dirs_target}
     DEPENDS ${COMPONENT_DIR}/include/colproc ${COMPONENT_DIR}/parse_classes.py
     VERBATIM 
 )
