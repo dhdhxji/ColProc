@@ -84,6 +84,18 @@ def filter_class_unique_names(
 
 
 
+def filter_class_non_abstract_class(
+    nodes: typing.Iterable[clang.cindex.Cursor]
+) -> typing.Iterable[clang.cindex.Cursor]:
+    result = []
+    for c in nodes: 
+        if c.is_abstract_record() == False:
+            result.append(c)
+
+    return result        
+
+
+
 def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.cindex.Cursor]:
     result = []
     ccargs    = '-x c++ --std=c++11'.split() + [f'-I{path}' for path in include_path]
@@ -117,4 +129,6 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
 
 
 args = parse_args()
-colproc_classes = find_colproc_classes(args.i, args.include_path)
+colproc_classes = filter_class_non_abstract_class(
+    find_colproc_classes(args.i, args.include_path)
+)
