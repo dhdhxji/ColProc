@@ -69,6 +69,21 @@ def filter_class_node_by_base_class_tree(
 
 
 
+def filter_class_unique_names(
+    nodes: typing.Iterable[clang.cindex.Cursor]
+) -> typing.Iterable[clang.cindex.Cursor]:
+    class_names = set()
+    result = []
+
+    for c in nodes:
+        if c.displayname not in class_names:
+            class_names.add(c.displayname)
+            result.append(c)
+
+    return result
+
+
+
 def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.cindex.Cursor]:
     result = []
     ccargs    = '-x c++ --std=c++11'.split() + [f'-I{path}' for path in include_path]
@@ -96,8 +111,8 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
         )
 
         result = result + colproc_variable_classes
-    
-    return result
+
+    return filter_class_unique_names(result)
 
 
 
