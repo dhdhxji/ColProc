@@ -3,6 +3,9 @@ from pathlib import Path
 import typing
 import clang.cindex
 
+COLPROC_BASE_CLASSES = (
+    'ColProc', 'Variable'
+)
 
 
 def parse_args():
@@ -119,7 +122,7 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
 
         colproc_variable_classes = filter_class_node_by_base_class_tree (
             classes,
-            ['ColProc', 'Variable']
+            COLPROC_BASE_CLASSES
         )
 
         result = result + colproc_variable_classes
@@ -127,8 +130,70 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
     return filter_class_unique_names(result)
 
 
-
+###################################################################
+# STAGE 1: Parse colproc sources to find class to be serializable #
+###################################################################
 args = parse_args()
 colproc_classes = filter_class_non_abstract_class(
     find_colproc_classes(args.i, args.include_path)
 )
+
+###############################################################
+# STAGE 2: Save class information for code generation utility #
+###############################################################
+def gen_colproc_class_info_dict(
+    colproc_class: clang.cindex.Cursor,
+) -> dict:
+    """
+    Output:
+    {
+        "className": "GeneratorRainbow",
+        "constructors": [
+            {
+                "arguments": (
+                    {
+                        "type": "Variable<uint32_t>*",
+                        "name": "length"
+                    },
+                    {
+                        "type": "Variable<uint32_t>*",
+                        "name": "angle"
+                    },
+                    {
+                        "type": "Variable<uint32_t>*",
+                        "name": "cycle_period_ms"
+                    }
+                )
+            }
+        ]
+    }
+    """
+    
+    c_constructors = (
+        c for c in filter_node_list_by_node_kind(
+            colproc_class.get_children(), [clang.cindex.CursorKind.CONSTRUCTOR]
+        )
+    )
+
+    constructors = []
+    for c in c_constructors:
+        args = []
+        for param in c.get_arguments():
+            name = param.displayname
+            type = ''.join(t.spelling for t in param.get_tokens() if t.spelling != name)
+            args.append({
+                'type': type,
+                'name': name
+            })
+        
+        constructors.append({'arguments': args})
+
+    return {
+        'className': colproc_class.spelling,
+        'constructors': constructors
+    }
+
+
+
+for c in colproc_classes:
+    print(gen_colproc_class_info_dict(c))
