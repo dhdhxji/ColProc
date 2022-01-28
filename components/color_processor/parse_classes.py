@@ -2,9 +2,10 @@ import argparse
 from pathlib import Path
 import typing
 import clang.cindex
+import json
 
 COLPROC_BASE_CLASSES = (
-    'ColProc', 'Variable'
+    'ColProc', 'Variable<T>'
 )
 
 
@@ -44,7 +45,7 @@ def filter_class_node_by_base_class(
         )
 
         for base_class in c_base_classes:
-            if base_class.displayname.split()[1] in base_classes:
+            if base_class.displayname.split()[-1] in base_classes:
                 result.append(c)
 
     return result
@@ -117,7 +118,7 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
 
         classes = filter_node_list_by_node_kind(
             root_node, 
-            [clang.cindex.CursorKind.CLASS_DECL, clang.cindex.CursorKind.STRUCT_DECL]
+            [clang.cindex.CursorKind.CLASS_DECL, clang.cindex.CursorKind.CLASS_TEMPLATE, clang.cindex.CursorKind.STRUCT_DECL]
         )
 
         colproc_variable_classes = filter_class_node_by_base_class_tree (
@@ -180,7 +181,7 @@ def gen_colproc_class_info_dict(
         args = []
         for param in c.get_arguments():
             name = param.displayname
-            type = ''.join(t.spelling for t in param.get_tokens() if t.spelling != name)
+            type = ' '.join(t.spelling for t in param.get_tokens() if t.spelling != name)
             args.append({
                 'type': type,
                 'name': name
@@ -194,6 +195,7 @@ def gen_colproc_class_info_dict(
     }
 
 
-
-for c in colproc_classes:
-    print(gen_colproc_class_info_dict(c))
+class_info_json = json.dumps( 
+    tuple(gen_colproc_class_info_dict(c) for c in colproc_classes) 
+)
+print(class_info_json)
