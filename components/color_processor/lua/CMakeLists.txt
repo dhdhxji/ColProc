@@ -1,53 +1,49 @@
-# Download sources
-ExternalProject_Add(lua
-   URL "https://www.lua.org/ftp/lua-5.3.5.tar.gz"
-   CONFIGURE_COMMAND ""
-   BUILD_COMMAND ""
-   BUILD_ALWAYS true
-   BUILD_IN_SOURCE true
-   INSTALL_COMMAND ""
-)
+include("../CPM.cmake")
 
-ExternalProject_Get_property(lua SOURCE_DIR)
+CPMAddPackage(
+   NAME lua
+   DOWNLOAD_ONLY
+   URL "https://www.lua.org/ftp/lua-5.3.5.tar.gz"
+)
 
 add_library(liblua STATIC)
 
 target_sources( liblua PUBLIC
-   ${SOURCE_DIR}/src/lapi.c
-   ${SOURCE_DIR}/src/lauxlib.c
-   ${SOURCE_DIR}/src/lbaselib.c
-   ${SOURCE_DIR}/src/lbitlib.c
-   ${SOURCE_DIR}/src/lcode.c
-   ${SOURCE_DIR}/src/lcorolib.c
-   ${SOURCE_DIR}/src/lctype.c
-   ${SOURCE_DIR}/src/ldblib.c
-   ${SOURCE_DIR}/src/ldebug.c
-   ${SOURCE_DIR}/src/ldo.c
-   ${SOURCE_DIR}/src/ldump.c
-   ${SOURCE_DIR}/src/lfunc.c
-   ${SOURCE_DIR}/src/lgc.c
-   ${SOURCE_DIR}/src/linit.c
-   ${SOURCE_DIR}/src/liolib.c
-   ${SOURCE_DIR}/src/llex.c
-   ${SOURCE_DIR}/src/lmathlib.c
-   ${SOURCE_DIR}/src/lmem.c
-   ${SOURCE_DIR}/src/loadlib.c
-   ${SOURCE_DIR}/src/lobject.c
-   ${SOURCE_DIR}/src/lopcodes.c
-   ${SOURCE_DIR}/src/loslib.c
-   ${SOURCE_DIR}/src/lparser.c
-   ${SOURCE_DIR}/src/lstate.c
-   ${SOURCE_DIR}/src/lstring.c
-   ${SOURCE_DIR}/src/lstrlib.c
-   ${SOURCE_DIR}/src/ltable.c
-   ${SOURCE_DIR}/src/ltablib.c
-   ${SOURCE_DIR}/src/ltm.c
-   #${SOURCE_DIR}/src/lua.c
-   #${SOURCE_DIR}/src/luac.c
-   ${SOURCE_DIR}/src/lundump.c
-   ${SOURCE_DIR}/src/lutf8lib.c
-   ${SOURCE_DIR}/src/lvm.c
-   ${SOURCE_DIR}/src/lzio.c
+   ${lua_SOURCE_DIR}/src/lapi.c
+   ${lua_SOURCE_DIR}/src/lauxlib.c
+   ${lua_SOURCE_DIR}/src/lbaselib.c
+   ${lua_SOURCE_DIR}/src/lbitlib.c
+   ${lua_SOURCE_DIR}/src/lcode.c
+   ${lua_SOURCE_DIR}/src/lcorolib.c
+   ${lua_SOURCE_DIR}/src/lctype.c
+   ${lua_SOURCE_DIR}/src/ldblib.c
+   ${lua_SOURCE_DIR}/src/ldebug.c
+   ${lua_SOURCE_DIR}/src/ldo.c
+   ${lua_SOURCE_DIR}/src/ldump.c
+   ${lua_SOURCE_DIR}/src/lfunc.c
+   ${lua_SOURCE_DIR}/src/lgc.c
+   ${lua_SOURCE_DIR}/src/linit.c
+   ${lua_SOURCE_DIR}/src/liolib.c
+   ${lua_SOURCE_DIR}/src/llex.c
+   ${lua_SOURCE_DIR}/src/lmathlib.c
+   ${lua_SOURCE_DIR}/src/lmem.c
+   ${lua_SOURCE_DIR}/src/loadlib.c
+   ${lua_SOURCE_DIR}/src/lobject.c
+   ${lua_SOURCE_DIR}/src/lopcodes.c
+   ${lua_SOURCE_DIR}/src/loslib.c
+   ${lua_SOURCE_DIR}/src/lparser.c
+   ${lua_SOURCE_DIR}/src/lstate.c
+   ${lua_SOURCE_DIR}/src/lstring.c
+   ${lua_SOURCE_DIR}/src/lstrlib.c
+   ${lua_SOURCE_DIR}/src/ltable.c
+   ${lua_SOURCE_DIR}/src/ltablib.c
+   ${lua_SOURCE_DIR}/src/ltm.c
+   #${lua_SOURCE_DIR}/src/lua.c
+   #${lua_SOURCE_DIR}/src/luac.c
+   ${lua_SOURCE_DIR}/src/lundump.c
+   ${lua_SOURCE_DIR}/src/lutf8lib.c
+   ${lua_SOURCE_DIR}/src/lvm.c
+   ${lua_SOURCE_DIR}/src/lzio.c
 )
 
-target_include_directories(liblua PUBLIC "${SOURCE_DIR}/src")
+target_include_directories(liblua PUBLIC "${lua_SOURCE_DIR}/src")
