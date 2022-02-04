@@ -131,17 +131,7 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
     return filter_class_unique_names(result)
 
 
-###################################################################
-# STAGE 1: Parse colproc sources to find class to be serializable #
-###################################################################
-args = parse_args()
-colproc_classes = filter_class_non_abstract_class(
-    find_colproc_classes(args.i, args.include_path)
-)
 
-###############################################################
-# STAGE 2: Save class information for code generation utility #
-###############################################################
 def gen_colproc_class_info_dict(
     colproc_class: clang.cindex.Cursor,
 ) -> dict:
@@ -195,7 +185,24 @@ def gen_colproc_class_info_dict(
     }
 
 
+
+###################################################################
+# STAGE 1: Parse colproc sources to find class to be serializable #
+###################################################################
+args = parse_args()
+colproc_classes = filter_class_non_abstract_class(
+    find_colproc_classes(args.i, args.include_path)
+)
+
+###############################################################
+# STAGE 2: Save class information for code generation utility #
+###############################################################
 class_info_json = json.dumps( 
     tuple(gen_colproc_class_info_dict(c) for c in colproc_classes) 
 )
 print(class_info_json)
+
+#TODO
+# - Add parent class (like a Generator for RainbowGenerator)
+# - Add root parent class (like a Colproc for a GeneratorRainbow, Variable<T>)
+# - Template processing
