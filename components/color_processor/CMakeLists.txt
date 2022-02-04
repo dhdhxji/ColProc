@@ -4,6 +4,7 @@ idf_component_register(
     REQUIRES "led_strip" "esp32_mcufont"
 )
 
+# Generate ColProc and Variable class description
 get_target_property(include_dirs_target ${COMPONENT_LIB} INCLUDE_DIRECTORIES)
 
 add_custom_command(
@@ -18,3 +19,7 @@ add_dependencies(${COMPONENT_LIB} classes)
 
 set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES "./colproc/classes.json")
+
+# Add lua build
+add_subdirectory(lua)
+target_link_libraries(${COMPONENT_LIB} liblua)
