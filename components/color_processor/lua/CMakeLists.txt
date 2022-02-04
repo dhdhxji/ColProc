@@ -1,24 +1,17 @@
-#get_target_property(cxx_flags ${COMPONENT_LIB} COMPILE_OPTIONS)
-#get_target_property(cxx_def ${COMPONENT_LIB} COMPILE_DEFINITIONS)
-#get_target_property(ld_flags ${COMPONENT_LIB} LINK_OPTIONS)
-
-
+# Download sources
 ExternalProject_Add(lua
    URL "https://www.lua.org/ftp/lua-5.3.5.tar.gz"
    CONFIGURE_COMMAND ""
    BUILD_COMMAND ""
-   #BUILD_COMMAND make posix CC=${CMAKE_C_COMPILER} MYLDFLAGS=-lc
-   #BUILD_COMMAND "make posix CC=${CMAKE_C_COMPILER} MYCFLAGS=${cxx_flags} ${cxx_def} MYLDFLAGS=${ld_flags}"
    BUILD_ALWAYS true
    BUILD_IN_SOURCE true
    INSTALL_COMMAND ""
 )
 
-add_library(liblua STATIC)
-#message("liblua will be found at \'${SOURCE_DIR}/src\'")
-
 ExternalProject_Get_property(lua SOURCE_DIR)
-#target_compile_definitions(liblua PUBLIC "LUA_USE_POSIX")
+
+add_library(liblua STATIC)
+
 target_sources( liblua PUBLIC
    ${SOURCE_DIR}/src/lapi.c
    ${SOURCE_DIR}/src/lauxlib.c
