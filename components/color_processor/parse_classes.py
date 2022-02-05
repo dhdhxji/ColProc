@@ -34,20 +34,29 @@ def filter_node_list_by_node_kind(
 
 
 
+def class_get_base_class_names(
+    c_class: clang.cindex.Cursor,
+) -> typing.Iterable[str]:
+    c_base_classes = filter_node_list_by_node_kind(
+        c_class.get_children(), 
+        [clang.cindex.CursorKind.CXX_BASE_SPECIFIER]
+    )
+
+    return [base.displayname.split()[-1] for base in c_base_classes]
+
+
+
 def filter_class_node_by_base_class(
     nodes: typing.Iterable[clang.cindex.Cursor],
     base_classes: typing.Iterable[str]
 ) -> typing.Iterable[clang.cindex.Cursor]:
     result = []
     for c in nodes:    
-        c_base_classes = filter_node_list_by_node_kind(
-            c.get_children(), 
-            [clang.cindex.CursorKind.CXX_BASE_SPECIFIER]
-        )
-
-        for base_class in c_base_classes:
-            if base_class.displayname.split()[-1] in base_classes:
+        c_base_classes = class_get_base_class_names(c)
+        for base in c_base_classes:
+            if base in base_classes:
                 result.append(c)
+                break
 
     return result
 
@@ -143,13 +152,16 @@ colproc_classes = filter_class_non_abstract_class(
 ###############################################################
 # STAGE 2: Save class information for code generation utility #
 ###############################################################
-def gen_colproc_class_info_dict(
-    colproc_class: clang.cindex.Cursor,
+def class_info_dict(
+    c_class: clang.cindex.Cursor,
+    root_class: str=''
 ) -> dict:
     """
     Output:
     {
         "className": "GeneratorRainbow",
+        "rootClass": "ColProc",
+        "baseClass": ["Generator"],
         "constructors": [
             {
                 "arguments": (
@@ -173,7 +185,7 @@ def gen_colproc_class_info_dict(
     
     c_constructors = (
         c for c in filter_node_list_by_node_kind(
-            colproc_class.get_children(), [clang.cindex.CursorKind.CONSTRUCTOR]
+            c_class.get_children(), [clang.cindex.CursorKind.CONSTRUCTOR]
         )
     )
 
@@ -191,13 +203,14 @@ def gen_colproc_class_info_dict(
         constructors.append({'arguments': args})
 
     return {
-        'className': colproc_class.spelling,
+        'className': c_class.spelling,
+        'rootClass': root_class,
         'constructors': constructors
     }
 
 
 class_info_json = json.dumps( 
-    tuple(gen_colproc_class_info_dict(c) for c in colproc_classes),
+    tuple(class_info_dict(c) for c in colproc_classes),
     indent=2
 )
 print(class_info_json)
