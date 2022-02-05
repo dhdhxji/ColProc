@@ -9,7 +9,7 @@ import json
 def parse_args():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('-i', help='Input class directory to analyze')
-    parser.add_argument('-o', help='Class info json output')
+    parser.add_argument('-o', default = '', help='Class info json output')
     parser.add_argument('--include_path', nargs='+', default=[], help='Include directories path compile options')
     parser.add_argument('--root_class', nargs='+', help='Root class names to search derived classes for')
 
@@ -267,7 +267,14 @@ for root in args.root_class:
 ###############################################################
 # STAGE 2: Save class information for code generation utility #
 ###############################################################
-print(json.dumps(
+json_output = json.dumps(
     parsed_class_info,
     indent=2
-))
+)
+
+if(args.o != ''):
+    with open(args.o, 'w') as f:
+        f.write(json_output) 
+else:
+    print(json_output)
+    
