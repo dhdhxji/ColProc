@@ -196,6 +196,7 @@ def gen_colproc_class_info_dict(
 
 
 class_info_json = json.dumps( 
-    tuple(gen_colproc_class_info_dict(c) for c in colproc_classes) 
+    tuple(gen_colproc_class_info_dict(c) for c in colproc_classes),
+    indent=2
 )
 print(class_info_json)
