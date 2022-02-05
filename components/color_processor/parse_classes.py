@@ -203,8 +203,9 @@ def class_info_dict(
         constructors.append({'arguments': args})
 
     return {
-        'className': c_class.spelling,
+        'className': c_class.displayname,
         'rootClass': root_class,
+        'baseClass': list(class_get_base_class_names(c_class)),
         'constructors': constructors
     }
 
