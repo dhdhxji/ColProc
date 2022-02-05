@@ -224,7 +224,10 @@ def class_info_dict(
     )
 
     constructors = tuple(
-        {'arguments': tuple(class_method_get_args_decl(c))}
+        {
+            'access': c.access_specifier.name.lower(),
+            'arguments': tuple(class_method_get_args_decl(c))
+        }
         for c in c_constructors
     )
 
@@ -232,6 +235,7 @@ def class_info_dict(
         {
             'name': c.spelling,
             'returnType': c.result_type.spelling,
+            'access': c.access_specifier.name.lower(),
             'arguments': tuple(class_method_get_args_decl(c))
         }
         for c in c_methods
