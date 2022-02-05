@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument('-i', help='Input class directory to analyze')
     parser.add_argument('-o', help='Class info json output')
     parser.add_argument('--include_path', nargs='+', default=[], help='Include directories path compile options')
+    parser.add_argument('--root_class', nargs='+', help='Root class names to search derived classes for')
 
     return parser.parse_args()
 
