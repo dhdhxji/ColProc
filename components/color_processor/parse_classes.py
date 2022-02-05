@@ -80,7 +80,7 @@ def filter_class_node_by_base_class(
 
 
 
-def filter_class_node_by_base_class_tree(
+def filter_class_node_by_root_class(
     nodes: typing.Iterable[clang.cindex.Cursor],
     base_class_names: typing.Iterable[str]
 ) -> typing.Iterable[clang.cindex.Cursor]:
@@ -153,7 +153,7 @@ def find_classes_by_root(
             [clang.cindex.CursorKind.CLASS_DECL, clang.cindex.CursorKind.CLASS_TEMPLATE, clang.cindex.CursorKind.STRUCT_DECL]
         )
 
-        root_inherited_classes = filter_class_node_by_base_class_tree (
+        root_inherited_classes = filter_class_node_by_root_class (
             classes,
             root_classes
         )
