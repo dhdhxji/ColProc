@@ -243,6 +243,7 @@ def class_info_dict(
 
     return {
         'className': c_class.displayname,
+        'headerPath': c_class.location.file.name,
         'rootClass': root_class,
         'baseClass': list(class_get_base_class_names(c_class)),
         'constructors': constructors,
