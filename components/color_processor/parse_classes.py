@@ -191,6 +191,25 @@ def class_info_dict(
                     }
                 )
             }
+        ],
+        "methods": [
+            {
+                "name": "someMEthod",
+                "arguments": (
+                    {
+                        "type": "Variable<uint32_t>*",
+                        "name": "length"
+                    },
+                    {
+                        "type": "Variable<uint32_t>*",
+                        "name": "angle"
+                    },
+                    {
+                        "type": "Variable<uint32_t>*",
+                        "name": "cycle_period_ms"
+                    }
+                )
+            }
         ]
     }
     """
