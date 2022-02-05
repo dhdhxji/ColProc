@@ -194,7 +194,8 @@ def class_info_dict(
         ],
         "methods": [
             {
-                "name": "someMEthod",
+                "name": "someMethod",
+                "returnType": "void",
                 "arguments": (
                     {
                         "type": "Variable<uint32_t>*",
@@ -228,7 +229,11 @@ def class_info_dict(
     )
 
     methods = tuple(
-        {'name': c.spelling,'arguments': tuple(class_method_get_args_decl(c))}
+        {
+            'name': c.spelling,
+            'returnType': c.result_type.spelling,
+            'arguments': tuple(class_method_get_args_decl(c))
+        }
         for c in c_methods
     )
 
