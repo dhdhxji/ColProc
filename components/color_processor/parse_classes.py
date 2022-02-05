@@ -4,9 +4,6 @@ import typing
 import clang.cindex
 import json
 
-COLPROC_BASE_CLASSES = (
-    'ColProc', 'Variable<T>'
-)
 
 
 def parse_args():
@@ -17,6 +14,39 @@ def parse_args():
     parser.add_argument('--root_class', nargs='+', help='Root class names to search derived classes for')
 
     return parser.parse_args()
+
+
+
+def class_get_base_class_names(
+    c_class: clang.cindex.Cursor,
+) -> typing.Iterable[str]:
+    c_base_classes = filter_node_list_by_node_kind(
+        c_class.get_children(), 
+        [clang.cindex.CursorKind.CXX_BASE_SPECIFIER]
+    )
+
+    return [base.displayname.split()[-1] for base in c_base_classes]
+
+
+
+def class_method_get_args_decl(
+    c_method: clang.cindex.Cursor,
+) -> typing.Iterable[dict]:
+    """ 
+    (
+        {
+            "type": "Variable<uint32_t>*",
+            "name": "length"
+        }
+    )
+    """ 
+    return (
+        {
+            'type': ' '.join(t.spelling for t in param.get_tokens() if t.spelling != param.displayname),
+            'name': param.displayname
+        }
+        for param in c_method.get_arguments()
+    )
 
 
 
@@ -31,18 +61,6 @@ def filter_node_list_by_node_kind(
             result.append(i)
 
     return result
-
-
-
-def class_get_base_class_names(
-    c_class: clang.cindex.Cursor,
-) -> typing.Iterable[str]:
-    c_base_classes = filter_node_list_by_node_kind(
-        c_class.get_children(), 
-        [clang.cindex.CursorKind.CXX_BASE_SPECIFIER]
-    )
-
-    return [base.displayname.split()[-1] for base in c_base_classes]
 
 
 
@@ -110,7 +128,11 @@ def filter_class_non_abstract_class(
 
 
 
-def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.cindex.Cursor]:
+def find_classes_by_root(
+    directory, 
+    root_classes,
+    include_path=''
+) -> typing.Iterable[clang.cindex.Cursor]:
     result = []
     ccargs    = '-x c++ --std=c++11'.split() + [f'-I{path}' for path in include_path]
     for header in Path(directory).rglob('*.h'):
@@ -131,27 +153,17 @@ def find_colproc_classes(directory, include_path='') -> typing.Iterable[clang.ci
             [clang.cindex.CursorKind.CLASS_DECL, clang.cindex.CursorKind.CLASS_TEMPLATE, clang.cindex.CursorKind.STRUCT_DECL]
         )
 
-        colproc_variable_classes = filter_class_node_by_base_class_tree (
+        root_inherited_classes = filter_class_node_by_base_class_tree (
             classes,
-            COLPROC_BASE_CLASSES
+            root_classes
         )
 
-        result = result + colproc_variable_classes
+        result = result + root_inherited_classes
 
     return filter_class_unique_names(result)
 
 
-###################################################################
-# STAGE 1: Parse colproc sources to find class to be serializable #
-###################################################################
-args = parse_args()
-colproc_classes = filter_class_non_abstract_class(
-    find_colproc_classes(args.i, args.include_path)
-)
 
-###############################################################
-# STAGE 2: Save class information for code generation utility #
-###############################################################
 def class_info_dict(
     c_class: clang.cindex.Cursor,
     root_class: str=''
@@ -183,35 +195,50 @@ def class_info_dict(
     }
     """
     
-    c_constructors = (
-        c for c in filter_node_list_by_node_kind(
-            c_class.get_children(), [clang.cindex.CursorKind.CONSTRUCTOR]
-        )
+    c_constructors = filter_node_list_by_node_kind(
+        c_class.get_children(), [clang.cindex.CursorKind.CONSTRUCTOR]
     )
 
-    constructors = []
-    for c in c_constructors:
-        args = []
-        for param in c.get_arguments():
-            name = param.displayname
-            type = ' '.join(t.spelling for t in param.get_tokens() if t.spelling != name)
-            args.append({
-                'type': type,
-                'name': name
-            })
-        
-        constructors.append({'arguments': args})
+    c_methods = filter_node_list_by_node_kind(
+        c_class.get_children(), [clang.cindex.CursorKind.CXX_METHOD]
+    )
+
+    constructors = tuple(
+        {'arguments': tuple(class_method_get_args_decl(c))}
+        for c in c_constructors
+    )
+
+    methods = tuple(
+        {'name': c.spelling,'arguments': tuple(class_method_get_args_decl(c))}
+        for c in c_methods
+    )
 
     return {
         'className': c_class.displayname,
         'rootClass': root_class,
         'baseClass': list(class_get_base_class_names(c_class)),
-        'constructors': constructors
+        'constructors': constructors,
+        'methods': methods
     }
 
 
-class_info_json = json.dumps( 
-    tuple(class_info_dict(c) for c in colproc_classes),
+###########################################################
+# STAGE 1: Parse sources to find class to be serializable #
+###########################################################
+args = parse_args()
+
+parsed_class_info = []
+for root in args.root_class:
+    classes = filter_class_non_abstract_class(
+        find_classes_by_root(args.i, (root, ), args.include_path)
+    )
+
+    parsed_class_info = parsed_class_info + list([class_info_dict(c, root_class=root) for c in classes])
+
+###############################################################
+# STAGE 2: Save class information for code generation utility #
+###############################################################
+print(json.dumps(
+    parsed_class_info,
     indent=2
-)
-print(class_info_json)
+))
