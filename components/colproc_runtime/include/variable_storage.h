@@ -53,6 +53,10 @@ public:
     }
 
     void clear() {
+        for(auto it: _storage) {
+            delete it.second;
+        }
+        
         _storage.clear();
     }
 

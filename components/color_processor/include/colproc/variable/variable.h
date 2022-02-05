@@ -10,6 +10,8 @@ class Variable;
 
 class AbstractVariable {
 public:
+    virtual ~AbstractVariable() {};
+
     template <typename T> Variable<T>* castToVariable() {
         if(getVariableType() != typeid(T)) {
             throw std::runtime_error(
@@ -30,6 +32,8 @@ template <typename T>
 class Variable: public AbstractVariable
 {
 public:
+    virtual ~Variable() {};
+
     virtual T getValue() {
         return _value;
     }
