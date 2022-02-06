@@ -1,0 +1,36 @@
+#ifndef BINDINGS_H
+#define BINDINGS_H
+
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+
+#include "LuaBridge/LuaBridge.h"
+
+/*[[[cog
+import json
+import cog
+
+def read_all(file_path: str):
+    with open(file_path, 'r') as f:
+        return f.read()
+
+meta = json.loads(read_all(class_meta_path))
+]]]*/
+//[[[end]]]
+
+
+/*[[[cog
+includes = set(c['headerPath'] for c in meta)
+for include in includes:
+    cog.outl(f'#include "{include}"')
+]]]*/
+//[[[end]]]
+
+
+
+lua_State* bindings_new_state() {
+    
+}
+
+#endif // BINDINGS_H
