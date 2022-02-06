@@ -13,7 +13,7 @@ add_custom_command(
         -i ${COMPONENT_DIR}/include/colproc/
         -o ./colproc/classes.json
         --include_path ${include_dirs_target}
-        --root_class "ColProc" "Variable<T>"
+        --root_class "ColProc" "Variable<T>" "Canvas"
     DEPENDS ${COMPONENT_DIR}/include/colproc ${COMPONENT_DIR}/parse_classes.py
     VERBATIM 
 )
@@ -25,6 +25,9 @@ set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES "./colproc/classes.json")
 
 include("CPM.cmake")
+
+# run cog for bindings.cog with -o binginfs.h
+# run cog with variable class_meta_path=classes.json    
 
 # Add lua build
 add_subdirectory(lua)
