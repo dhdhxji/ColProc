@@ -6,9 +6,8 @@ CPMAddPackage(
    URL "https://www.lua.org/ftp/lua-5.3.5.tar.gz"
 )
 
-add_library(liblua STATIC)
-
-target_sources( liblua PUBLIC
+set(
+   LUA_SRCS
    ${lua_SOURCE_DIR}/src/lapi.c
    ${lua_SOURCE_DIR}/src/lauxlib.c
    ${lua_SOURCE_DIR}/src/lbaselib.c
@@ -38,12 +37,18 @@ target_sources( liblua PUBLIC
    ${lua_SOURCE_DIR}/src/ltable.c
    ${lua_SOURCE_DIR}/src/ltablib.c
    ${lua_SOURCE_DIR}/src/ltm.c
-   #${lua_SOURCE_DIR}/src/lua.c
-   #${lua_SOURCE_DIR}/src/luac.c
    ${lua_SOURCE_DIR}/src/lundump.c
    ${lua_SOURCE_DIR}/src/lutf8lib.c
    ${lua_SOURCE_DIR}/src/lvm.c
    ${lua_SOURCE_DIR}/src/lzio.c
 )
+#${lua_SOURCE_DIR}/src/lua.c  #Exclude lua interpreter
+#${lua_SOURCE_DIR}/src/luac.c #Exclude lua compiler
 
-target_include_directories(liblua PUBLIC "${lua_SOURCE_DIR}/src")
+   
+add_library(liblua OBJECT ${LUA_SRCS})
+set_source_files_properties(${LUA_SRCS} PROPERTIES LANGUAGE CXX)
+target_compile_definitions(liblua PUBLIC "LUA_32BITS")
+
+
+target_include_directories(liblua PUBLIC ${lua_SOURCE_DIR}/src/)
