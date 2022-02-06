@@ -28,9 +28,22 @@ for include in includes:
 //[[[end]]]
 
 
+// Expand templated classes with all known templates args 
+
+// filter class by white list?
+
+// Remove classes with custom types (not standard, like *int*_t, string, size_t, etc) 
+// in arguments/fields/returns (Like a CanvasStrip with strip_mode_t arg)
 
 lua_State* bindings_new_state() {
-    
+    lua_State* state luaL_newstate();
+    luaL_openlibs(luaState);
+
+    // Generate binding code & apply it to state
+
+    // Add Info about available classes/funcs/vars to lua
+
+    return state;
 }
 
 #endif // BINDINGS_H
