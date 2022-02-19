@@ -256,28 +256,28 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
 
     for c in classes_to_bind:
         if 'baseClass' in c.keys():
-            print(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{untemplate(c["className"])}")')
+            cog.outl(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{untemplate(c["className"])}")')
         else:
-            print(f'.beginClass<{c["className"]}>("{untemplate(c["className"])}")')
+            cog.outl(f'.beginClass<{c["className"]}>("{untemplate(c["className"])}")')
             
         constr = find_longest_public_constructor(c['constructors'])
         if constr is not None:
-            print(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
+            cog.outl(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
 
         for m in c['methods']:
             if m['access'] != 'public':
                 continue
 
             types = m['returnType'] + ', ' + ', '.join(arg['type'] for arg in m['arguments'])
-            print(f'.addFunction<{types}>("{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]})')
+            cog.outl(f'.addFunction<{types}>("{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]})')
 
         for f in c['fields']:
             if f['access'] != 'public':
                 continue
 
-            print(f'.addData<{f["type"]}>("{f["name"]}", &{c["className"]}::{f["name"]})')
+            cog.outl(f'.addData<{f["type"]}>("{f["name"]}", &{c["className"]}::{f["name"]})')
 
-        print('.endclass()')
+        cog.outl('.endClass()')
 
     ]]]*/
     //[[[end]]]
