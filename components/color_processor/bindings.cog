@@ -6,8 +6,16 @@
 #include "lualib.h"
 
 #include "LuaBridge/LuaBridge.h"
+#include "LuaBridge/Array.h"
+#include "LuaBridge/Vector.h"
+#include "LuaBridge/List.h"
+#include "LuaBridge/Map.h"
 
 /*[[[cog
+##############################
+# Retrieve class information #
+##############################
+
 import json
 import cog
 
@@ -16,24 +24,187 @@ def read_all(file_path: str):
         return f.read()
 
 meta = json.loads(read_all(class_meta_path))
+
+]]]*/
+//[[[end]]]
+
+
+
+/*[[[cog
+###############################
+# Include all library headers #
+###############################
+
+includes = set(c['headerPath'] for c in meta)
+for include in includes:
+    cog.outl(f'#include "{include}"')
+
+]]]*/
+//[[[end]]]
+
+
+//TODO: filter class by allowed list
+
+// Expand templated classes with all known templates args
+/*[[[cog
+###############
+# DEFINITIONS #
+###############
+
+template_specs = {
+    'Variable': (
+        'int', 
+        'int8_t', 'int16_t', 'int32_t', 'int64_t',
+        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
+        'float', 'double',
+        'char', 'bool'),
+
+    'VariableCallback': (
+        'int', 
+        'int8_t', 'int16_t', 'int32_t', 'int64_t',
+        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
+        'float', 'double',
+        'char', 'bool'),
+
+    'VariableConstant': (
+        'int', 
+        'int8_t', 'int16_t', 'int32_t', 'int64_t',
+        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
+        'float', 'double',
+        'char', 'bool')
+}
+
+def is_template(typename: str) -> bool:
+    return '<' in typename
+
+def template_pure_name(typename: str) -> str:
+    return typename.split('<')[0]
+
+def template_spec_name(typename: str) -> str:
+    res = '<'.join(typename.split('<')[1:])
+    return ''.join(res.split('>'))
+
+def spec_template(typename:str, ct_name: str, templ_arg: str):
+    if template_spec_name(typename) == ct_name:
+        return f'{template_pure_name(typename)}<{templ_arg}>'
+    else:
+        #it is already specified
+        return typename
+
+# Assuming that type is one word
+def find_type_pos(tokens):
+    qualifiers = ('const', 'volatile', 'static', '&', '*', '(', ')', '::', 'std', 'function', '<', '>')
+    for i in range(len(tokens)):
+        if tokens[i] not in qualifiers:
+            return i
+
+def get_pure_type(type_w_qualifiers: str) -> str:
+    tokens = type_w_qualifiers.split()
+    pos = find_type_pos(tokens)
+    return tokens[pos]
+
+def replace_type(type_w_qualifiers: str, new_type: str) ->str:
+    tokens = type_w_qualifiers.split()
+    pos = find_type_pos(tokens)
+    tokens[pos] = new_type
+    return ' '.join(tokens)
+
+
+def gen_class_templates(class_meta, template_spec=template_specs):
+    res = []
+    
+    ctempl_name = template_spec_name(class_meta['className'])
+    for spec in template_spec[template_pure_name(class_meta['className'])]:
+        c = class_meta.copy()
+        c['constructors'] = c['constructors'].copy()
+        c['methods'] = c['methods'].copy()
+        if 'baseClass' in c.keys():
+            c['baseClass'] = c['baseClass'].copy()
+        else:
+            c['baseClass'] = []
+
+        c['className'] = spec_template(
+            c['className'],
+            ctempl_name,
+            spec
+        )
+
+        if 'rootClass' in c.keys() and is_template(c['rootClass']):
+            if template_spec_name(c['rootClass']) == ctempl_name:
+                c['rootClass'] = spec_template(c['rootClass'],
+                                               ctempl_name,
+                                               spec)
+
+        base_classes = []
+        for base in c['baseClass']:
+            if is_template(base):
+                if template_spec_name(base) == ctempl_name:
+                    base_classes.append(spec_template(c['rootClass'],
+                                                    ctempl_name,
+                                                    spec)
+                    )
+            else:
+                base_classes.append(base)
+        c['baseClass'] = base_classes
+        
+        for constr in c['constructors']:
+            for arg in constr['arguments']:
+                if is_template(arg):
+                    arg['type'] = spec_template(
+                        arg['type'], 
+                        ctempl_name, 
+                        spec
+                    )
+
+            for arg in constr['arguments']:
+                if is_template(arg):
+                    arg['type'] = spec_template(
+                        arg['type'], 
+                        ctempl_name, 
+                        spec
+                    )
+                
+                if get_pure_type(arg['type']) == ctempl_name:
+                    arg['type'] = replace_type(arg['type'], spec)
+
+        for method in c['methods']:
+            if is_template(method['returnType']):
+                method['returnType'] = spec_template(
+                    method['returnType'],
+                    ctempl_name,
+                    spec
+                )
+
+            for arg in method['arguments']:
+                if is_template(arg):
+                    arg['type'] = spec_template(
+                        arg['type'], 
+                        ctempl_name, 
+                        spec
+                    )
+                
+                if get_pure_type(arg['type']) == ctempl_name:
+                    arg['type'] = replace_type(arg['type'], spec)
+
+        res.append(c)
+
+    return res
+
 ]]]*/
 //[[[end]]]
 
 
 /*[[[cog
-includes = set(c['headerPath'] for c in meta)
-for include in includes:
-    cog.outl(f'#include "{include}"')
+classes_to_bind = []
+for c in meta:
+    if is_template(c['className']):
+        classes_to_bind = classes_to_bind + gen_class_templates(c)
+    else:
+        classes_to_bind.append(c)
+
 ]]]*/
 //[[[end]]]
 
-
-// Expand templated classes with all known templates args 
-
-// filter class by white list?
-
-// Remove classes with custom types (not standard, like *int*_t, string, size_t, etc) 
-// in arguments/fields/returns (Like a CanvasStrip with strip_mode_t arg)
 
 lua_State* bindings_new_state() {
     lua_State* state luaL_newstate();
