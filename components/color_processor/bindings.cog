@@ -120,8 +120,6 @@ def gen_class_templates(class_meta, template_spec=template_specs):
         c['methods'] = c['methods'].copy()
         if 'baseClass' in c.keys():
             c['baseClass'] = c['baseClass'].copy()
-        else:
-            c['baseClass'] = []
 
         c['className'] = spec_template(
             c['className'],
@@ -135,17 +133,18 @@ def gen_class_templates(class_meta, template_spec=template_specs):
                                                ctempl_name,
                                                spec)
 
-        base_classes = []
-        for base in c['baseClass']:
-            if is_template(base):
-                if template_spec_name(base) == ctempl_name:
-                    base_classes.append(spec_template(c['rootClass'],
-                                                    ctempl_name,
-                                                    spec)
-                    )
-            else:
-                base_classes.append(base)
-        c['baseClass'] = base_classes
+        if 'baseClass' in c.keys():
+            base_classes = []
+            for base in c['baseClass']:
+                if is_template(base):
+                    if template_spec_name(base) == ctempl_name:
+                        base_classes.append(spec_template(c['rootClass'],
+                                                        ctempl_name,
+                                                        spec)
+                        )
+                else:
+                    base_classes.append(base)
+            c['baseClass'] = base_classes
         
         for constr in c['constructors']:
             for arg in constr['arguments']:
@@ -190,6 +189,21 @@ def gen_class_templates(class_meta, template_spec=template_specs):
 
     return res
 
+def find_longest_public_constructor(constructors):
+    l_constr = None
+
+    for c in constructors:
+        is_public = c['access'] == 'public'
+
+        if l_constr == None and is_public:
+            l_constr = c
+            continue
+
+        if len(c['arguments']) > len(l_constr['arguments']) and is_public:
+            l_constr = c
+
+    return l_constr
+
 ]]]*/
 //[[[end]]]
 
@@ -206,15 +220,53 @@ for c in meta:
 //[[[end]]]
 
 
-lua_State* bindings_new_state() {
-    lua_State* state luaL_newstate();
+/*[[[cog
+cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
+]]]*/
+//[[[end]]]
+{
+    lua_State* luaState = luaL_newstate();
     luaL_openlibs(luaState);
 
-    // Generate binding code & apply it to state
+    luabridge::getGlobalNamespace(luaState)
+
+    /*[[[cog
+    ########################
+    # Fill up binding code #
+    ########################
+
+    for c in classes_to_bind:
+        if 'baseClass' in c.keys():
+            print(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{c["className"].replace("<", "_").replace(">", "")}")')
+        else:
+            print(f'.beginClass<{c["className"]}>("{c["className"]}")')
+            
+        constr = find_longest_public_constructor(c['constructors'])
+        if constr is not None:
+            print(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
+
+        for m in c['methods']:
+            if m['access'] != 'public':
+                continue
+
+            types = m['returnType'] + ', ' + ', '.join(arg['type'] for arg in m['arguments'])
+            print(f'.addFunction<{types}>("{m["name"]}", &{c["className"]}::{m["name"]})')
+
+        for f in c['fields']:
+            if f['access'] != 'public':
+                continue
+
+            print(f'.addData<{f["type"]}>("{f["name"]}", &{c["className"]}::{f["name"]})')
+
+        print('.endclass()')
+
+    ]]]*/
+    //[[[end]]]
+    ;
 
     // Add Info about available classes/funcs/vars to lua
 
-    return state;
+    return luaState;
 }
 
 #endif // BINDINGS_H
