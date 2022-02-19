@@ -215,6 +215,13 @@ def class_info_dict(
                     }
                 )
             }
+        ],
+        "fields": [
+            {
+                "name": "variable",
+                "type": "int",
+                "access": "public"
+            }
         ]
     }
     """
@@ -225,6 +232,10 @@ def class_info_dict(
 
     c_methods = filter_node_list_by_node_kind(
         c_class.get_children(), [clang.cindex.CursorKind.CXX_METHOD]
+    )
+
+    c_fields = filter_node_list_by_node_kind(
+        c_class.get_children(), [clang.cindex.CursorKind.FIELD_DECL]
     )
 
     constructors = tuple(
@@ -245,6 +256,17 @@ def class_info_dict(
         for c in c_methods
     )
 
+    fields = tuple(
+        {
+            'name': c.spelling,
+            'type': c.type.spelling,
+            'access': c.access_specifier.name.lower()
+        }
+        for c in c_fields
+    )
+
+
+
     if root_class != c_class.displayname:
         return {
             'className': c_class.displayname,
@@ -252,14 +274,16 @@ def class_info_dict(
             'rootClass': root_class,
             'baseClass': list(class_get_base_class_names(c_class)),
             'constructors': constructors,
-            'methods': methods
+            'methods': methods,
+            'fields': fields
         }
     else:
         return {
             'className': c_class.displayname,
             'headerPath': c_class.location.file.name,
             'constructors': constructors,
-            'methods': methods
+            'methods': methods,
+            'fields': fields
         }
 
 
