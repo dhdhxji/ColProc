@@ -204,6 +204,23 @@ def find_longest_public_constructor(constructors):
 
     return l_constr
 
+def bind_function_name(name):
+    if name == 'operator==':
+        return '__eq'
+    elif name == 'operator+':
+        return '__add'
+    elif name == 'operator-':
+        return '__sub'
+    elif name == 'operator*':
+        return '__mul'
+    elif name == 'operator/':
+        return '__div'
+    elif name == 'operator%':
+        return '__mod'
+    else:
+        return name
+        
+
 ]]]*/
 //[[[end]]]
 
@@ -250,7 +267,7 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
                 continue
 
             types = m['returnType'] + ', ' + ', '.join(arg['type'] for arg in m['arguments'])
-            print(f'.addFunction<{types}>("{m["name"]}", &{c["className"]}::{m["name"]})')
+            print(f'.addFunction<{types}>("{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]})')
 
         for f in c['fields']:
             if f['access'] != 'public':
