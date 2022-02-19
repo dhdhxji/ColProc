@@ -13,7 +13,7 @@ add_custom_command(
         -i ${COMPONENT_DIR}/include/colproc/
         -o ./colproc/classes.json
         --include_path ${include_dirs_target}
-        --root_class "ColProc" "Variable<T>" "Canvas"
+        --root_class "ColRGB" "Canvas" "Variable<T>" "ColProc" 
     DEPENDS ${COMPONENT_DIR}/include/colproc ${COMPONENT_DIR}/parse_classes.py
     VERBATIM 
 )
