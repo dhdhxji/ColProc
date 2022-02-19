@@ -25,7 +25,9 @@ def class_get_base_class_names(
         [clang.cindex.CursorKind.CXX_BASE_SPECIFIER]
     )
 
-    return [base.displayname.split()[-1] for base in c_base_classes]
+    res = list([base.spelling.split()[-1] for base in c_base_classes])
+
+    return res
 
 
 
@@ -153,12 +155,14 @@ def find_classes_by_root(
             [clang.cindex.CursorKind.CLASS_DECL, clang.cindex.CursorKind.CLASS_TEMPLATE, clang.cindex.CursorKind.STRUCT_DECL]
         )
 
+        root_classes_c = list(c for c in classes if c.displayname in root_classes)
+
         root_inherited_classes = filter_class_node_by_root_class (
             classes,
             root_classes
         )
 
-        result = result + root_inherited_classes
+        result = root_classes_c + result + root_inherited_classes
 
     return filter_class_unique_names(result)
 
@@ -241,14 +245,22 @@ def class_info_dict(
         for c in c_methods
     )
 
-    return {
-        'className': c_class.displayname,
-        'headerPath': c_class.location.file.name,
-        'rootClass': root_class,
-        'baseClass': list(class_get_base_class_names(c_class)),
-        'constructors': constructors,
-        'methods': methods
-    }
+    if root_class != c_class.displayname:
+        return {
+            'className': c_class.displayname,
+            'headerPath': c_class.location.file.name,
+            'rootClass': root_class,
+            'baseClass': list(class_get_base_class_names(c_class)),
+            'constructors': constructors,
+            'methods': methods
+        }
+    else:
+        return {
+            'className': c_class.displayname,
+            'headerPath': c_class.location.file.name,
+            'constructors': constructors,
+            'methods': methods
+        }
 
 
 ###########################################################
@@ -258,9 +270,11 @@ args = parse_args()
 
 parsed_class_info = []
 for root in args.root_class:
-    classes = filter_class_non_abstract_class(
-        find_classes_by_root(args.i, (root, ), args.include_path)
-    )
+    #classes = filter_class_non_abstract_class(
+    #    find_classes_by_root(args.i, (root, ), args.include_path)
+    #)
+
+    classes = find_classes_by_root(args.i, (root, ), args.include_path)
 
     parsed_class_info = parsed_class_info + list([class_info_dict(c, root_class=root) for c in classes])
 
