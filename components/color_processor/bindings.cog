@@ -220,6 +220,8 @@ def bind_function_name(name):
     else:
         return name
         
+def untemplate(name):
+    return name.replace("<", "_").replace(">", "")
 
 ]]]*/
 //[[[end]]]
@@ -254,9 +256,9 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
 
     for c in classes_to_bind:
         if 'baseClass' in c.keys():
-            print(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{c["className"].replace("<", "_").replace(">", "")}")')
+            print(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{untemplate(c["className"])}")')
         else:
-            print(f'.beginClass<{c["className"]}>("{c["className"]}")')
+            print(f'.beginClass<{c["className"]}>("{untemplate(c["className"])}")')
             
         constr = find_longest_public_constructor(c['constructors'])
         if constr is not None:
