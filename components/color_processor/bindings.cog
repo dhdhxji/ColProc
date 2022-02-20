@@ -6,7 +6,6 @@
 #include "lualib.h"
 
 #include "LuaBridge/LuaBridge.h"
-#include "LuaBridge/Array.h"
 #include "LuaBridge/Vector.h"
 #include "LuaBridge/List.h"
 #include "LuaBridge/Map.h"
@@ -268,7 +267,7 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
             if m['access'] != 'public':
                 continue
 
-            types = m['returnType'] + ', ' + ', '.join(arg['type'] for arg in m['arguments'])
+            types = ', '.join(arg['type'] for arg in ({'type': m['returnType']}, *m['arguments']))
             cog.outl(f'.addFunction<{types}>("{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]})')
 
         for f in c['fields']:
