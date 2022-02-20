@@ -20,8 +20,7 @@ protected:
             TransEntry::start_time = start_time;
         }
     };
-    
-
+     
 public:
     void addTransition(ColProc* start, ColProc* end, uint32_t time) {
         _transition_queue.push(TransEntry(start, end, time));
@@ -30,15 +29,6 @@ public:
     bool isComplete() const {
         return _transition_queue.empty(); 
     }
-
-    virtual bool renderTransition(
-        int16_t off_x,
-        int16_t off_y,
-        uint32_t time, 
-        Canvas* canvas,
-        const TransEntry& transition_ctx,
-        uint32_t time_since_start
-    ) = 0;
 
     virtual void render(
         int16_t off_x,
@@ -66,6 +56,16 @@ public:
             _transition_queue.pop();
         }
     }
+
+protected:
+    virtual bool renderTransition(
+        int16_t off_x,
+        int16_t off_y,
+        uint32_t time, 
+        Canvas* canvas,
+        const TransEntry& transition_ctx,
+        uint32_t time_since_start
+    ) = 0;
 
 protected:
     std::queue<TransEntry> _transition_queue;

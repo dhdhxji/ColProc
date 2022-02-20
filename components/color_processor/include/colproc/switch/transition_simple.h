@@ -5,7 +5,7 @@
 #include "colproc/variable/variable.h"
 
 class TransitionSimple: public Transition {
-public: 
+protected: 
     virtual bool renderTransition(
         int16_t off_x,
         int16_t off_y,
