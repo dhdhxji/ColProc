@@ -7,6 +7,8 @@ idf_component_register(
 # Generate ColProc and Variable class description
 get_target_property(include_dirs_target ${COMPONENT_LIB} INCLUDE_DIRECTORIES)
 
+
+
 add_custom_command(
     OUTPUT colproc/classes.json
     COMMAND python3 ${COMPONENT_DIR}/parse_classes.py
@@ -19,15 +21,34 @@ add_custom_command(
 )
 
 add_custom_target(classes DEPENDS "colproc/classes.json")
-add_dependencies(${COMPONENT_LIB} classes)
+
+
+
+add_custom_command(
+    OUTPUT colproc/bindings.h
+    COMMAND cog 
+        -D builder_fn_name=colproc 
+        -D class_meta_path=colproc/classes.json 
+        -o colproc/bindings.h
+        ${COMPONENT_DIR}/bindings.cog
+    DEPENDS classes
+    VERBATIM
+)
+
+add_custom_target(lua_bindings DEPENDS colproc/bindings.h)
+add_dependencies(${COMPONENT_LIB} lua_bindings)
+
+
 
 set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES "./colproc/classes.json")
 
+set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
+    ADDITIONAL_MAKE_CLEAN_FILES colproc/bindings.h)
+
 include("CPM.cmake")
 
-# run cog for bindings.cog with -o binginfs.h
-# run cog with variable class_meta_path=classes.json    
+
 
 # Add lua build
 add_subdirectory(lua)
