@@ -288,3 +288,5 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
 }
 
 #endif // BINDINGS_H
+
+//Exclude     //.addConstructor<void(*)(size_t, size_t, strip_mode_t, rmt_channel_t, gpio_num_t)>()
