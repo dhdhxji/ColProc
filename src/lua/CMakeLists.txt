@@ -1,5 +1,3 @@
-include("../CPM.cmake")
-
 CPMAddPackage(
    NAME lua
    DOWNLOAD_ONLY
