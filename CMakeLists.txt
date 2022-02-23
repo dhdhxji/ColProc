@@ -14,9 +14,9 @@ target_include_directories(
 
 target_sources(
     ${PROJECT_NAME} PUBLIC
-    src/core/util/util.cpp
-    src/core/canvas/canvas_console.cpp
-    src/core/canvas/canvas.cpp
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core/util/util.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas_console.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
 )
 
 
