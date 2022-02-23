@@ -29,3 +29,19 @@ target_link_libraries(${PROJECT_NAME} liblua)
 
 CPMAddPackage("gh:vinniefalco/LuaBridge#2.6")
 target_link_libraries(${PROJECT_NAME} LuaBridge)
+
+
+
+# Code generation for lua bindings
+add_custom_command(
+    OUTPUT "classes.json"
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/util/class_parser.py
+        -i "${CMAKE_CURRENT_SOURCE_DIR}/include/colproc/"
+        -o "classes.json"
+        --include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/colproc/"
+        --root_class "ColRGB" "Canvas" "Variable<T>" "ColProc" 
+    DEPENDS "include" "util/class_parser.py"
+    VERBATIM 
+)
+
+add_custom_target(classes DEPENDS "classes.json")
