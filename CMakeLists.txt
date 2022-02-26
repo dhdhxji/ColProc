@@ -16,6 +16,7 @@ target_sources(
     ${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/util/util.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/runtime.cpp"
 )
 
 
