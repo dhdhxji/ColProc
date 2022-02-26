@@ -15,7 +15,6 @@ target_include_directories(
 target_sources(
     ${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/util/util.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas_console.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
 )
 
@@ -29,6 +28,9 @@ target_link_libraries(${PROJECT_NAME} liblua)
 
 CPMAddPackage("gh:vinniefalco/LuaBridge#2.6")
 target_link_libraries(${PROJECT_NAME} LuaBridge)
+
+add_subdirectory("src/mcufont")
+target_link_libraries(colproc mcufont)
 
 
 
