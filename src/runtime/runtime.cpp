@@ -38,7 +38,9 @@ Runtime::stop_reason_t Runtime::runRenderLoop() {
                 duration_cast<milliseconds>(frameStart.time_since_epoch()).count(), 
                 _canvas
             );
+
             _canvas->display();
+            _canvas->clear();
         } catch(...) {
             return EXCEPTION;
         }
