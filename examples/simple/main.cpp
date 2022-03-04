@@ -9,12 +9,13 @@
 #include "colproc/variable/variable_callback.h"
 #include "colproc/switch/switch.h"
 #include "colproc/switch/transition_simple.h"
+#include "colproc/mod/concat.h"
 #include "colproc/runtime/runtime.h"
 
 #include <chrono>
 
 
-#define REFRESH_RATE_HZ 60
+#define REFRESH_RATE_HZ 30
 #define MATRIX_W        19
 #define MATRIX_H        7
 
@@ -87,11 +88,49 @@ private:
 
 
 
-static ColProc* build_processor(const VariableStorage& storage) {
-    ColProc* text = new GeneratorText(
-        new VariableConstant<std::string>("07:45"),
+static ColProc* build_processor(VariableStorage& storage) {
+    storage.addVariable<std::string>(
+        "hrs",
+        new VariableCallback<std::string>([](){
+            time_t ttime = time(0);
+            struct tm* tm_time = localtime(&ttime);
+            return  std::to_string(tm_time->tm_hour);
+        })
+    );
+
+    storage.addVariable<std::string>(
+        "mins",
+        new VariableCallback<std::string>([](){
+            time_t ttime = time(0);
+            struct tm* tm_time = localtime(&ttime);
+            return  std::to_string(tm_time->tm_min);
+        })
+    );
+
+    ColProc* hrs = new GeneratorText(
+        storage.getVariable<std::string>("hrs"),
         new VariableConstant<std::string>("3_by_57")
     );
+
+    ColProc* dash = new Move(
+        new GeneratorText(
+            new VariableConstant<std::string>(":"),
+            new VariableConstant<std::string>("3_by_57")
+        ),
+        new VariableConstant<int16_t>(7),
+        new VariableConstant<int16_t>(0)
+    );
+
+    ColProc* min = new Move(
+        new GeneratorText(
+            storage.getVariable<std::string>("mins"),
+            new VariableConstant<std::string>("3_by_57")
+        ),
+        new VariableConstant<int16_t>(10),
+        new VariableConstant<int16_t>(0)
+    );
+
+    ColProc* text = new Concat({hrs, dash, min});
 
     ColProc* moved_text = new Move(
         text,
@@ -135,12 +174,11 @@ int main(int argc, char** argv)
     );
 
     ColProc* processor = build_processor(*storage);
-    VariableStorage varManager;
 
     Runtime rt(
         new CanvasConsole(MATRIX_W, MATRIX_H),
         processor,
-        &varManager,
+        storage,
         REFRESH_RATE_HZ
     );
 
