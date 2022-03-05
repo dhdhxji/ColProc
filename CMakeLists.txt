@@ -43,7 +43,7 @@ add_custom_command(
     COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/util/class_parser.py
         -i "${CMAKE_CURRENT_SOURCE_DIR}/include/colproc/"
         -o "colproc/classes.json"
-        --include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/colproc/"
+        --include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/"
         --root_class "ColRGB" "Canvas" "Variable<T>" "ColProc" 
     DEPENDS "include" "util/class_parser.py"
     VERBATIM 
@@ -69,6 +69,7 @@ add_custom_command(
 
 add_custom_target(
     lua_bindings DEPENDS 
+    classes
     "${BINDIGS_DIR}/bindings.h"
     "${CMAKE_CURRENT_BINARY_DIR}/colproc/classes.json"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/bindings.cog"
