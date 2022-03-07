@@ -20,6 +20,8 @@
 #define MATRIX_H        7
 
 
+using namespace std::chrono;
+
 
 class CanvasConsole: public Canvas
 {
@@ -162,25 +164,25 @@ static ColProc* build_processor(VariableStorage& storage) {
 
 int main(int argc, char** argv)
 {
-    VariableStorage* storage = new VariableStorage();
-    storage->addVariable(
+    CanvasConsole canvas(MATRIX_W, MATRIX_H);
+
+    Runtime rt;
+    rt.setCanvas(&canvas);
+    rt.setFrameRate(REFRESH_RATE_HZ);
+    
+    rt.getVariableManager().addVariable(
         "rainbow_text_select",
         new VariableCallback<uint32_t>(
             []() {
-                uint32_t time_ms = std::chrono::milliseconds().count();
+                uint32_t time_ms = 
+                    duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
                 return (time_ms/1000) % 2;
             }
         )
     );
 
-    ColProc* processor = build_processor(*storage);
-
-    Runtime rt(
-        new CanvasConsole(MATRIX_W, MATRIX_H),
-        processor,
-        storage,
-        REFRESH_RATE_HZ
-    );
+    std::unique_ptr<ColProc> node( build_processor(rt.getVariableManager()) );
+    rt.setRenderNode(node.get());
 
     auto stopReason = rt.runRenderLoop();
 }
