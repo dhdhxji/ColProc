@@ -10,13 +10,19 @@ add_library(${PROJECT_NAME})
 target_include_directories(
     ${PROJECT_NAME} PUBLIC 
     "include"
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+#target_include_directories(
+#    ${PROJECT_NAME} PUBLIC
+#)
 
 target_sources(
     ${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/util/util.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/runtime.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/lua_runtime.cpp"
 )
 
 
