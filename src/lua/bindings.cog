@@ -10,6 +10,9 @@
 #include "LuaBridge/List.h"
 #include "LuaBridge/Map.h"
 
+#include <string>
+using std::string;
+
 /*[[[cog
 ##############################
 # Retrieve class information #
@@ -17,6 +20,7 @@
 
 import json
 import cog
+import copy
 
 def read_all(file_path: str):
     with open(file_path, 'r') as f:
@@ -56,22 +60,26 @@ template_specs = {
         'int8_t', 'int16_t', 'int32_t', 'int64_t',
         'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
         'float', 'double',
-        'char', 'bool'),
+        'char', 'bool', 'string'),
 
     'VariableCallback': (
         'int', 
         'int8_t', 'int16_t', 'int32_t', 'int64_t',
         'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
         'float', 'double',
-        'char', 'bool'),
+        'char', 'bool', 'string'),
 
     'VariableConstant': (
         'int', 
         'int8_t', 'int16_t', 'int32_t', 'int64_t',
         'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
         'float', 'double',
-        'char', 'bool')
+        'char', 'bool', 'string')
 }
+
+exclude_class = (
+    'VariableCallback<T>',
+)
 
 def is_template(typename: str) -> bool:
     return '<' in typename
@@ -114,11 +122,7 @@ def gen_class_templates(class_meta, template_spec=template_specs):
     
     ctempl_name = template_spec_name(class_meta['className'])
     for spec in template_spec[template_pure_name(class_meta['className'])]:
-        c = class_meta.copy()
-        c['constructors'] = c['constructors'].copy()
-        c['methods'] = c['methods'].copy()
-        if 'baseClass' in c.keys():
-            c['baseClass'] = c['baseClass'].copy()
+        c = copy.deepcopy(class_meta)
 
         c['className'] = spec_template(
             c['className'],
@@ -146,14 +150,6 @@ def gen_class_templates(class_meta, template_spec=template_specs):
             c['baseClass'] = base_classes
         
         for constr in c['constructors']:
-            for arg in constr['arguments']:
-                if is_template(arg):
-                    arg['type'] = spec_template(
-                        arg['type'], 
-                        ctempl_name, 
-                        spec
-                    )
-
             for arg in constr['arguments']:
                 if is_template(arg):
                     arg['type'] = spec_template(
@@ -229,6 +225,9 @@ def untemplate(name):
 /*[[[cog
 classes_to_bind = []
 for c in meta:
+    if c['className'] in exclude_class:
+        continue
+
     if is_template(c['className']):
         classes_to_bind = classes_to_bind + gen_class_templates(c)
     else:
