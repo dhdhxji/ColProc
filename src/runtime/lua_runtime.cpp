@@ -37,6 +37,9 @@ void LuaRuntime::initRuntime(std::string initScriptPath) {
         throw std::runtime_error("[LUA]: Init script error: " + errMsg);
     }
     
-    auto rt = luabridge::getGlobal(_state, "renderTree").cast<ColProc*>();
+    auto rt = luabridge::getGlobal(_state, "RenderTree").cast<ColProc*>();
+    if(rt == nullptr) {
+        throw std::runtime_error("[LUA]: Root render node is not set");
+    }
     setRenderNode(rt);
 }
