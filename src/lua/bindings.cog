@@ -259,9 +259,11 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
         else:
             cog.outl(f'.beginClass<{c["className"]}>("{untemplate(c["className"])}")')
             
-        constr = find_longest_public_constructor(c['constructors'])
-        if constr is not None:
-            cog.outl(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
+        
+        if not c['isAbstract']:
+            constr = find_longest_public_constructor(c['constructors'])
+            if constr is not None:
+                cog.outl(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
 
         for m in c['methods']:
             if m['access'] != 'public':
