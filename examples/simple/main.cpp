@@ -90,8 +90,8 @@ private:
 
 
 
-static ColProc* build_processor(VariableStorage& storage) {
-    storage.addVariable<std::string>(
+static ColProc* build_processor(IVariableStorage& storage) {
+    storage.addVariable(
         "hrs",
         new VariableCallback<std::string>([](){
             time_t ttime = time(0);
@@ -100,7 +100,7 @@ static ColProc* build_processor(VariableStorage& storage) {
         })
     );
 
-    storage.addVariable<std::string>(
+    storage.addVariable(
         "mins",
         new VariableCallback<std::string>([](){
             time_t ttime = time(0);
@@ -110,7 +110,7 @@ static ColProc* build_processor(VariableStorage& storage) {
     );
 
     ColProc* hrs = new GeneratorText(
-        storage.getVariable<std::string>("hrs"),
+        storage.getVariable("hrs")->castToVariable<std::string>(),
         new VariableConstant<std::string>("3_by_57")
     );
 
@@ -125,7 +125,7 @@ static ColProc* build_processor(VariableStorage& storage) {
 
     ColProc* min = new Move(
         new GeneratorText(
-            storage.getVariable<std::string>("mins"),
+            storage.getVariable("mins")->castToVariable<std::string>(),
             new VariableConstant<std::string>("3_by_57")
         ),
         new VariableConstant<int16_t>(10),
@@ -150,7 +150,7 @@ static ColProc* build_processor(VariableStorage& storage) {
 
     ColProc* switched = new Switch(
         {mixed_text, rainbow},
-        storage.getVariable<uint32_t>("rainbow_text_select"),
+        storage.getVariable("rainbow_text_select")->castToVariable<uint32_t>(),
         new TransitionSimple()
     );
 

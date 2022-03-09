@@ -23,6 +23,7 @@ target_sources(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/runtime.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/lua_runtime.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/map_var_storage.cpp"
 )
 
 

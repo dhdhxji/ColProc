@@ -1,4 +1,5 @@
 #include "colproc/runtime/runtime.h"
+#include "colproc/runtime/map_var_storage.h"
 
 #include <chrono>
 #include <thread>
@@ -6,7 +7,7 @@
 using namespace std::chrono;
 
 Runtime::Runtime() {
-    _varManager.reset(new VariableStorage());
+    _varManager.reset(new MapVarStorage());
     _interrupted = false;
     _frameRate = 0;
     _canvas = nullptr;
@@ -18,7 +19,7 @@ Runtime::Runtime(
     ColProc* renderTree, 
     uint32_t frameRate
 ) {
-    _varManager.reset(new VariableStorage());
+    _varManager.reset(new MapVarStorage());
     _canvas = canvas;
     _renderTree = renderTree;
     _frameRate = frameRate;
@@ -29,7 +30,7 @@ Runtime::Runtime(
     Canvas* canvas,
     ColProc* renderTree,
     uint32_t frameRate,
-    VariableStorage* storage
+    IVariableStorage* storage
 ) {
     _varManager.reset(storage);
     _canvas = canvas;
@@ -62,7 +63,7 @@ uint32_t Runtime::getFrameRate() {
     return _frameRate;
 }
 
-VariableStorage& Runtime::getVariableManager() {
+IVariableStorage& Runtime::getVariableManager() {
     return *_varManager;
 }
 

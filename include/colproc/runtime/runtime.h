@@ -2,7 +2,7 @@
 #define RUNTIME_H
 
 #include "colproc/colproc.h"
-#include "colproc/runtime/variable_storage.h"
+#include "colproc/runtime/map_var_storage.h"
 #include "colproc/canvas/canvas.h"
 
 #include <atomic>
@@ -34,7 +34,7 @@ public:
     void setFrameRate(uint32_t frameRate);
     uint32_t getFrameRate();
 
-    VariableStorage& getVariableManager();
+    IVariableStorage& getVariableManager();
 
     stop_reason_t runRenderLoop();
     void interrupt();
@@ -44,7 +44,7 @@ protected:
         Canvas* canvas,
         ColProc* renderTree,
         uint32_t frameRate,
-        VariableStorage* storage
+        IVariableStorage* storage
     );
 
 protected:
@@ -52,7 +52,7 @@ protected:
     uint32_t _frameRate;
     Canvas* _canvas;
     ColProc* _renderTree;
-    std::unique_ptr<VariableStorage> _varManager;
+    std::unique_ptr<IVariableStorage> _varManager;
 };
 
 #endif // RUNTIME_H
