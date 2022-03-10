@@ -10,8 +10,8 @@ using std::string;
 
 class IVariableStorage {
 public:
-    virtual void addVariable(string name,  AbstractVariable* var) = 0;
-    virtual AbstractVariable* getVariable(string name) const = 0;
+    virtual void addVariable(const string& name,  AbstractVariable* var) = 0;
+    virtual AbstractVariable* getVariable(const string& name) const = 0;
     virtual void updateVariables() = 0;
     virtual void clear() = 0;
 };
