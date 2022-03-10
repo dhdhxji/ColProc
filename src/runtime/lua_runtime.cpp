@@ -43,3 +43,34 @@ void LuaRuntime::initRuntime(std::string initScriptPath) {
     }
     setRenderNode(rt);
 }
+
+LuaRuntime::LuaVarStorage::LuaVarStorage(lua_State* s): _state(s) {}
+
+void LuaRuntime::LuaVarStorage::addVariable(
+    const std::string& name,  AbstractVariable* var
+) {
+    luabridge::setGlobal<AbstractVariable*>(_state, var, name.c_str());
+    registerVar(name);
+}
+
+AbstractVariable* LuaRuntime::LuaVarStorage::getVariable(const std::string& name) const {
+    AbstractVariable* var = 
+        luabridge::getGlobal(_state, name.c_str()).cast<AbstractVariable*>();
+    
+    return var;
+}
+
+void LuaRuntime::LuaVarStorage::updateVariables() {
+    for(string name: _usedVars) {
+        luabridge::getGlobal(_state, name.c_str()).cast<AbstractVariable*>()
+            ->updateValue();
+    }
+}
+
+void LuaRuntime::LuaVarStorage::clear() {
+    _usedVars.clear();
+}
+
+void LuaRuntime::LuaVarStorage::registerVar(const std::string& name) {
+    _usedVars.insert(name);
+}

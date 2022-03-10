@@ -51,7 +51,7 @@ add_custom_command(
         -i "${CMAKE_CURRENT_SOURCE_DIR}/include/colproc/"
         -o "colproc/classes.json"
         --include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-        --root_class "ColRGB" "Canvas" "Variable<T>" "ColProc" 
+        --root_class "ColRGB" "Canvas" "AbstractVariable" "ColProc" 
     DEPENDS "include" "util/class_parser.py"
     VERBATIM 
 )
