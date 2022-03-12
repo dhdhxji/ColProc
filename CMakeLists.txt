@@ -54,7 +54,7 @@ add_custom_command(
         -i "${CMAKE_CURRENT_SOURCE_DIR}/include/colproc/"
         -o "colproc/classes.json"
         --include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-        --root_class "ColRGB" "Canvas" "AbstractVariable" "ColProc" 
+        --root_class "ColRGB" "Canvas" "Variable<T>" "ColProc" 
     DEPENDS "include" "util/class_parser.py"
     VERBATIM 
 )
@@ -73,7 +73,7 @@ add_custom_command(
         -D class_meta_path=colproc/classes.json 
         -o "${BINDIGS_DIR}/bindings.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/bindings.cog"
-    DEPENDS classes "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/bindings.cog"
+    DEPENDS "colproc/classes.json" "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/bindings.cog"
     VERBATIM
 )
 
