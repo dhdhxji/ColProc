@@ -169,6 +169,9 @@ def gen_class_templates(class_meta, template_spec=template_specs):
                     spec
                 )
 
+            if get_pure_type(method['returnType']) == ctempl_name:
+                method['returnType'] = replace_type(method['returnType'], spec)
+
             for arg in method['arguments']:
                 if is_template(arg):
                     arg['type'] = spec_template(
