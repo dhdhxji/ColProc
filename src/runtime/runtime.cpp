@@ -1,21 +1,70 @@
 #include "colproc/runtime/runtime.h"
+#include "colproc/runtime/map_var_storage.h"
 
 #include <chrono>
 #include <thread>
 
 using namespace std::chrono;
 
+Runtime::Runtime() {
+    _varManager.reset(new MapVarStorage());
+    _interrupted = false;
+    _frameRate = 0;
+    _canvas = nullptr;
+    _renderTree = nullptr; 
+}
+
 Runtime::Runtime(
     Canvas* canvas,
     ColProc* renderTree, 
-    VariableStorage* varManager,
     uint32_t frameRate
 ) {
+    _varManager.reset(new MapVarStorage());
     _canvas = canvas;
     _renderTree = renderTree;
-    _varManager = varManager;
     _frameRate = frameRate;
     _interrupted.store(false);
+}
+
+Runtime::Runtime(
+    Canvas* canvas,
+    ColProc* renderTree,
+    uint32_t frameRate,
+    IVariableStorage* storage
+) {
+    _varManager.reset(storage);
+    _canvas = canvas;
+    _renderTree = renderTree;
+    _frameRate = frameRate;
+    _interrupted.store(false);
+}
+
+void Runtime::setCanvas(Canvas* canvas) {
+    _canvas = canvas;
+}
+
+Canvas* Runtime::getCanvas() {
+    return _canvas;
+}
+
+void Runtime::setRenderNode(ColProc* node) {
+    _renderTree = node;
+}
+
+ColProc* Runtime::getRenderNode() {
+    return _renderTree;
+}
+
+void Runtime::setFrameRate(uint32_t frameRate) {
+    _frameRate = frameRate;
+}
+
+uint32_t Runtime::getFrameRate() {
+    return _frameRate;
+}
+
+IVariableStorage& Runtime::getVariableManager() {
+    return *_varManager;
 }
 
 Runtime::stop_reason_t Runtime::runRenderLoop() {

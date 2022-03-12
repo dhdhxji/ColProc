@@ -20,6 +20,8 @@
 #define MATRIX_H        7
 
 
+using namespace std::chrono;
+
 
 class CanvasConsole: public Canvas
 {
@@ -88,8 +90,8 @@ private:
 
 
 
-static ColProc* build_processor(VariableStorage& storage) {
-    storage.addVariable<std::string>(
+static ColProc* build_processor(IVariableStorage& storage) {
+    storage.addVariable(
         "hrs",
         new VariableCallback<std::string>([](){
             time_t ttime = time(0);
@@ -98,7 +100,7 @@ static ColProc* build_processor(VariableStorage& storage) {
         })
     );
 
-    storage.addVariable<std::string>(
+    storage.addVariable(
         "mins",
         new VariableCallback<std::string>([](){
             time_t ttime = time(0);
@@ -108,7 +110,7 @@ static ColProc* build_processor(VariableStorage& storage) {
     );
 
     ColProc* hrs = new GeneratorText(
-        storage.getVariable<std::string>("hrs"),
+        storage.getVariable("hrs")->castToVariable<std::string>(),
         new VariableConstant<std::string>("3_by_57")
     );
 
@@ -123,7 +125,7 @@ static ColProc* build_processor(VariableStorage& storage) {
 
     ColProc* min = new Move(
         new GeneratorText(
-            storage.getVariable<std::string>("mins"),
+            storage.getVariable("mins")->castToVariable<std::string>(),
             new VariableConstant<std::string>("3_by_57")
         ),
         new VariableConstant<int16_t>(10),
@@ -148,7 +150,7 @@ static ColProc* build_processor(VariableStorage& storage) {
 
     ColProc* switched = new Switch(
         {mixed_text, rainbow},
-        storage.getVariable<uint32_t>("rainbow_text_select"),
+        storage.getVariable("rainbow_text_select")->castToVariable<uint32_t>(),
         new TransitionSimple()
     );
 
@@ -162,25 +164,25 @@ static ColProc* build_processor(VariableStorage& storage) {
 
 int main(int argc, char** argv)
 {
-    VariableStorage* storage = new VariableStorage();
-    storage->addVariable(
+    CanvasConsole canvas(MATRIX_W, MATRIX_H);
+
+    Runtime rt;
+    rt.setCanvas(&canvas);
+    rt.setFrameRate(REFRESH_RATE_HZ);
+    
+    rt.getVariableManager().addVariable(
         "rainbow_text_select",
         new VariableCallback<uint32_t>(
             []() {
-                uint32_t time_ms = std::chrono::milliseconds().count();
+                uint32_t time_ms = 
+                    duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
                 return (time_ms/1000) % 2;
             }
         )
     );
 
-    ColProc* processor = build_processor(*storage);
-
-    Runtime rt(
-        new CanvasConsole(MATRIX_W, MATRIX_H),
-        processor,
-        storage,
-        REFRESH_RATE_HZ
-    );
+    std::unique_ptr<ColProc> node( build_processor(rt.getVariableManager()) );
+    rt.setRenderNode(node.get());
 
     auto stopReason = rt.runRenderLoop();
 }

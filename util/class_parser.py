@@ -178,6 +178,7 @@ def class_info_dict(
         "className": "GeneratorRainbow",
         "rootClass": "ColProc",
         "baseClass": ["Generator"],
+        "isAbstract": True,
         "constructors": [
             {
                 "arguments": (
@@ -273,6 +274,7 @@ def class_info_dict(
             'headerPath': c_class.location.file.name,
             'rootClass': root_class,
             'baseClass': list(class_get_base_class_names(c_class)),
+            'isAbstract': c_class.is_abstract_record(),
             'constructors': constructors,
             'methods': methods,
             'fields': fields
@@ -281,6 +283,7 @@ def class_info_dict(
         return {
             'className': c_class.displayname,
             'headerPath': c_class.location.file.name,
+            'isAbstract': c_class.is_abstract_record(),
             'constructors': constructors,
             'methods': methods,
             'fields': fields

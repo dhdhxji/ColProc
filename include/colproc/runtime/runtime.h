@@ -2,10 +2,11 @@
 #define RUNTIME_H
 
 #include "colproc/colproc.h"
-#include "colproc/runtime/variable_storage.h"
+#include "colproc/runtime/map_var_storage.h"
 #include "colproc/canvas/canvas.h"
 
 #include <atomic>
+#include <memory>
 
 class Runtime {
 
@@ -16,23 +17,42 @@ public:
         INTERNAL_ERROR
     };
 
+    Runtime();
+
     Runtime(
         Canvas* canvas,
-        ColProc* renderTree, 
-        VariableStorage* varManager,
+        ColProc* renderTree,
         uint32_t frameRate
     );
+
+    void setCanvas(Canvas* canvas);
+    Canvas* getCanvas();
+
+    void setRenderNode(ColProc* node);
+    ColProc* getRenderNode();
+
+    void setFrameRate(uint32_t frameRate);
+    uint32_t getFrameRate();
+
+    IVariableStorage& getVariableManager();
 
     stop_reason_t runRenderLoop();
     void interrupt();
 
 protected:
+    Runtime(
+        Canvas* canvas,
+        ColProc* renderTree,
+        uint32_t frameRate,
+        IVariableStorage* storage
+    );
+
+protected:
     std::atomic_bool _interrupted;
     uint32_t _frameRate;
-
     Canvas* _canvas;
     ColProc* _renderTree;
-    VariableStorage* _varManager;
+    std::unique_ptr<IVariableStorage> _varManager;
 };
 
 #endif // RUNTIME_H

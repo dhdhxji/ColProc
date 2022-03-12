@@ -23,6 +23,11 @@ public:
         return dynamic_cast<Variable<T>*>(this);
     }
 
+    template<class T> inline
+    operator Variable<T>* () {
+        return castToVariable<T>();
+    }
+
     virtual void updateValue() = 0;
     
     virtual const std::type_info& getVariableType() = 0;
