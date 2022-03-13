@@ -234,7 +234,7 @@ for c in meta:
 
 
 /*[[[cog
-cog.outl(f'void {builder_fn_name}_build_lua_state(sol::satte& lua) ')
+cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
 ]]]*/
 //[[[end]]]
 {
@@ -252,16 +252,45 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::satte& lua) ')
 
         # Put the methods
         if 'methods' in c.keys():
-            for m in c['methods']:
-                if m['access'] != 'public':
-                    continue
 
-                cog.outl(f'\t, "{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]}')
+            # Group functions with the same name (for overloading)
+            methods = {}
+            for m in c['methods']:
+                if m['name'] not in methods.keys():
+                     methods[m['name']] = []
+
+                methods[m['name']].append(m)
+
+            for name, value in methods.items():
+                if len(value) >= 2:
+                    # gen overloads
+                    cog.outl(f'\t, "{bind_function_name(name)}", sol::overload(')
+                    
+                    func_spec_list = []
+                    for m in value:
+                        if m['access'] != 'public':
+                            continue
+                    
+                        args = [t['type'] for t in m['arguments']]
+                        func_spec = f'static_cast<{m["returnType"]}({c["className"]}::*)( {",".join(args)} )>( &{c["className"]}::{m["name"]} )'
+                        func_spec_list.append(func_spec)
+
+                    cog.outl(f'\t {", ".join(func_spec_list)}')
+                    
+                    cog.outl('\t )')
+
+                else:
+                    # gen method
+                    m = value[0]
+                    if m['access'] != 'public':
+                        continue
+
+                    cog.outl(f'\t, "{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]}')
 
         # Put base classes
         if 'baseClass' in c.keys():
-            base_class_sol = [f"sol::bases<{c_b}>" for c_b in c["baseClass"]]
-            cog.outl(f'\t, sol::base_classes, "{ ", ".join( base_class_sol ) }"')
+            base_class_sol = [f"sol::bases<{c_b}>()" for c_b in c["baseClass"]]
+            cog.outl(f'\t, sol::base_classes, { ", ".join( base_class_sol ) }')
 
         # Put the constructors
         #if not c['isAbstract']:
