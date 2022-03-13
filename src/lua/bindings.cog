@@ -1,14 +1,7 @@
 #ifndef BINDINGS_H
 #define BINDINGS_H
 
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-
-#include "LuaBridge/LuaBridge.h"
-#include "LuaBridge/Vector.h"
-#include "LuaBridge/List.h"
-#include "LuaBridge/Map.h"
+#include <sol/sol.hpp>
 
 #include <string>
 using std::string;
@@ -241,14 +234,12 @@ for c in meta:
 
 
 /*[[[cog
-cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
+cog.outl(f'void {builder_fn_name}_build_lua_state(sol::satte& lua) ')
 ]]]*/
 //[[[end]]]
 {
-    lua_State* luaState = luaL_newstate();
-    luaL_openlibs(luaState);
-
-    luabridge::getGlobalNamespace(luaState)
+    //TODO
+    //lua.open_libraries(sol::lib::*);
 
     /*[[[cog
     ########################
@@ -256,39 +247,33 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
     ########################
 
     for c in classes_to_bind:
+        # Put class declaration
+        cog.outl(f'lua.new_usertype<{c["className"]}>( \n\t"{untemplate(c["className"])}"')
+
+        # Put the methods
+        if 'methods' in c.keys():
+            for m in c['methods']:
+                if m['access'] != 'public':
+                    continue
+
+                cog.outl(f'\t, "{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]}')
+
+        # Put base classes
         if 'baseClass' in c.keys():
-            cog.outl(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{untemplate(c["className"])}")')
-        else:
-            cog.outl(f'.beginClass<{c["className"]}>("{untemplate(c["className"])}")')
-            
-        
-        if not c['isAbstract']:
-            constr = find_longest_public_constructor(c['constructors'])
-            if constr is not None:
-                cog.outl(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
+            base_class_sol = [f"sol::bases<{c_b}>" for c_b in c["baseClass"]]
+            cog.outl(f'\t, sol::base_classes, "{ ", ".join( base_class_sol ) }"')
 
-        for m in c['methods']:
-            if m['access'] != 'public':
-                continue
+        # Put the constructors
+        #if not c['isAbstract']:
+        #    cog.outl(f'''
+        #
+        #    ''')
 
-            types = ', '.join(arg['type'] for arg in ({'type': m['returnType']}, *m['arguments']))
-            cog.outl(f'.addFunction<{types}>("{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]})')
-
-        for f in c['fields']:
-            if f['access'] != 'public':
-                continue
-
-            cog.outl(f'.addData<{f["type"]}>("{f["name"]}", &{c["className"]}::{f["name"]})')
-
-        cog.outl('.endClass()')
-
+        cog.outl(');')
     ]]]*/
     //[[[end]]]
-    ;
 
     // Add Info about available classes/funcs/vars to lua
-
-    return luaState;
 }
 
 #endif // BINDINGS_H

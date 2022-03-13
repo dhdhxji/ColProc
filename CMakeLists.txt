@@ -37,8 +37,8 @@ include("CPM.cmake")
 add_subdirectory(src/lua)
 target_link_libraries(${PROJECT_NAME} liblua)
 
-CPMAddPackage("gh:vinniefalco/LuaBridge#2.6")
-target_link_libraries(${PROJECT_NAME} LuaBridge)
+CPMAddPackage("gh:ThePhD/sol2@3.2.3")
+target_link_libraries(${PROJECT_NAME} sol2)
 
 add_subdirectory("src/mcufont")
 target_link_libraries(colproc mcufont)
