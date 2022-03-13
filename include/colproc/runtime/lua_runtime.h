@@ -4,6 +4,9 @@
 #include <string>
 #include <set>
 #include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+#include "sol/sol.hpp"
 #include "colproc/runtime/runtime.h"
 #include "colproc/runtime/ivariable_storage.h"
 
@@ -17,14 +20,14 @@ public:
         std::string initScriptPath
     );
 
-    ~LuaRuntime();
+    ~LuaRuntime() = default;
 
     void initRuntime(std::string initScriptPath);
 
 protected:
     class LuaVarStorage: public IVariableStorage {
     public:
-        LuaVarStorage(lua_State* state);
+        LuaVarStorage(sol::state& s);
 
         virtual void addVariable(const std::string& name,  AbstractVariable* var) override;
         virtual AbstractVariable* getVariable(const std::string& name) const override;
@@ -35,11 +38,11 @@ protected:
 
     protected:
         std::set<std::string> _usedVars;
-        lua_State* _state;
+        sol::state& _state;
     };
 
 protected:
-    lua_State* _state;
+    sol::state _state;
 };
 
 #endif // LUA_RUNTIME_H
