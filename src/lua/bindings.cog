@@ -293,10 +293,27 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
             cog.outl(f'\t, sol::base_classes, { ", ".join( base_class_sol ) }')
 
         # Put the constructors
-        #if not c['isAbstract']:
-        #    cog.outl(f'''
-        #
-        #    ''')
+        if not c['isAbstract']:
+            if len(c['constructors']) == 0:
+                cog.outl("\t//No constructors available")
+                cog.outl('\t, "new", sol::no_constructor')
+            else:
+                constr_spec = list()
+                for co in c['constructors']:
+                    if co['access'] != 'public':
+                        continue
+                    
+                    args = [t['type'] for t in co['arguments']]
+                    constr_spec.append(f'{c["className"]}({", ".join(args)})')
+                
+                cog.outl(f'\t, "new", sol::constructors<{", ".join(constr_spec)}>()')
+        else:
+            cog.outl('\t//It is abstract class, do not bind constructors')
+            cog.outl('\t, "new", sol::no_constructor')
+        
+        # TODO
+        # Put all properties
+        
 
         cog.outl(');')
     ]]]*/
