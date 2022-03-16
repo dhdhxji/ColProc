@@ -214,6 +214,23 @@ def bind_function_name(name):
 def untemplate(name):
     return name.replace("<", "_").replace(">", "")
 
+def find_class_by_name(name: str, classes):
+    for c in classes:
+        if c["className"] == name:
+            return c
+
+    return None
+
+def find_base_class_chain_recursive(name, classes) -> tuple:
+    c = find_class_by_name(name, classes)
+    if c is None:
+        return None
+
+    if "baseClass" in c:
+        return (c["baseClass"][0], *find_base_class_chain_recursive(c["baseClass"][0], classes))
+    else: 
+        return ()
+
 ]]]*/
 //[[[end]]]
 
@@ -289,8 +306,11 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
 
         # Put base classes
         if 'baseClass' in c.keys():
-            base_class_sol = [f"sol::bases<{c_b}>()" for c_b in c["baseClass"]]
-            cog.outl(f'\t, sol::base_classes, { ", ".join( base_class_sol ) }')
+            # Find base classes recursively
+            base_class_types = find_base_class_chain_recursive(c['className'], classes_to_bind)
+
+            base_class_sol = f'sol::bases<{", ".join(base_class_types)}>()'
+            cog.outl(f'\t, sol::base_classes, {base_class_sol}')
 
         # Put the constructors
         if not c['isAbstract']:

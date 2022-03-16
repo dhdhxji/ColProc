@@ -1,4 +1,4 @@
-RenderTree = GeneratorText(
-    VariableConstant_string("19:45"),
-    VariableConstant_string("3_by_57")
+RenderTree = GeneratorText:new(
+    VariableConstant_string:new("19:45"),
+    VariableConstant_string:new("3_by_57")
 )
