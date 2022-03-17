@@ -73,7 +73,23 @@ LuaRuntime::~LuaRuntime() {
 void LuaRuntime::initRuntime(std::string initScriptPath) {
     _state->script_file(initScriptPath);
 
-    ColProc* rt = (*_state)["RenderTree"];
+    setRenderNode(getVar_s<ColProc>("RenderTree"));
+}
 
-    setRenderNode(rt);
+template<class T> inline
+T* LuaRuntime::getVar_s(const std::string& name) {
+    if((*_state)[name] == sol::nil) {
+        throw std::runtime_error("Variable " + name + " is not set");
+    }
+    
+    T* res = (*_state)[name];
+
+    if(res == nullptr) {
+        throw std::runtime_error(
+            "Variable " + name + 
+            " has invalid type."    
+        );
+    }
+
+    return res;
 }

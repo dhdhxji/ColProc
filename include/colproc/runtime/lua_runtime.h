@@ -22,6 +22,10 @@ public:
     void initRuntime(std::string initScriptPath);
 
 protected:
+    template<class T> inline
+    T* getVar_s(const std::string& name);
+
+protected:
     sol::state* _state;
 };
 
