@@ -8,9 +8,9 @@ class GeneratorRainbow: public Generator
 {
 public:
     GeneratorRainbow(
-        Variable<uint32_t>* length,
-        Variable<uint32_t>* angle,
-        Variable<uint32_t>* cycle_period_ms
+        Variable<int32_t>* length,
+        Variable<int32_t>* angle,
+        Variable<int32_t>* cycle_period_ms
     ) {
         _length = length;
         _angle = angle;
@@ -39,9 +39,9 @@ public:
     }
 
 protected:
-    Variable<uint32_t>* _length;
-    Variable<uint32_t>* _angle;
-    Variable<uint32_t>* _cycle_period_ms;    
+    Variable<int32_t>* _length;
+    Variable<int32_t>* _angle;
+    Variable<int32_t>* _cycle_period_ms;    
 };
 
 #endif // RAINBOW_H
