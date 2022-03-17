@@ -49,25 +49,16 @@ for include in includes:
 
 template_specs = {
     'Variable': (
-        'int', 
-        'int8_t', 'int16_t', 'int32_t', 'int64_t',
-        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
-        'float', 'double',
-        'char', 'bool', 'string'),
+        'int32_t', 'double', 'bool', 'string'
+    ),
 
     'VariableCallback': (
-        'int', 
-        'int8_t', 'int16_t', 'int32_t', 'int64_t',
-        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
-        'float', 'double',
-        'char', 'bool', 'string'),
+        'int32_t', 'double', 'bool', 'string'
+    ),
 
     'VariableConstant': (
-        'int', 
-        'int8_t', 'int16_t', 'int32_t', 'int64_t',
-        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
-        'float', 'double',
-        'char', 'bool', 'string')
+        'int32_t', 'double', 'bool', 'string'
+    )
 }
 
 exclude_class = (
@@ -249,6 +240,11 @@ for c in meta:
 ]]]*/
 //[[[end]]]
 
+template<class T, class Var>
+Var v(const T& var) {
+    printf("%s\n", typeid(T).name());
+    return Var(var);
+}
 
 /*[[[cog
 cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
@@ -338,6 +334,17 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
         cog.outl(');')
     ]]]*/
     //[[[end]]]
+
+    lua["v"] = sol::overload(
+        /*[[[cog
+        cog.outl( ',\n'.join(f'&v<{t}, VariableConstant<{t}>>' for t in template_specs['VariableConstant']) )
+        ]]]*/
+        //[[[end]]]
+        
+        //static_cast< VariableConstant<std::string>(*)(std::string) >( &v ),
+        //static_cast<VariableConstant<uint32_t>(*)(uint32_t)>( &v )//,
+        //static_cast<VariableConstant<uint8_t>(*)(uint8_t)>( &v )        
+    );
 
     // Add Info about available classes/funcs/vars to lua
 }
