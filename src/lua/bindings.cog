@@ -4,6 +4,8 @@
 #include <sol/sol.hpp>
 
 #include <string>
+#include <memory>
+
 using std::string;
 
 /*[[[cog
@@ -248,10 +250,10 @@ VariableConstant<T> v(const T& var) {
 
 // Variable callback converter
 template<class T>
-VariableCallback<T> v(sol::function cb) {
-    return VariableCallback<T>([cb](){
+std::unique_ptr<VariableCallback<T>> v(sol::function cb) {
+    return std::make_unique< VariableCallback<T> >([cb](){
         return cb();
-    });
+    } );
 }
 
 /*[[[cog
@@ -355,7 +357,7 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
 
     for t in template_specs['VariableCallback']:
         name = f'v{t[0]}'
-        cog.outl(f'lua["{name}"] = sol::overload( static_cast<VariableCallback<{t}>(*)(sol::function)>(&v<{t}>), static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>) );')
+        cog.outl(f'lua["{name}"] = sol::overload( static_cast<std::unique_ptr<VariableCallback<{t}>>(*)(sol::function)>(&v<{t}>), static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>) );')
 
         #cog.outl( ',\n'.join(f'&v{t[0]}<{t}>' for t in template_specs['VariableConstant']) )
     ]]]*/
