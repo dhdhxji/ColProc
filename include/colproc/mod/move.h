@@ -11,8 +11,8 @@ class Move: public ColProc {
 public:
     Move(
         ColProc* src, 
-        Variable<int16_t>* off_x, 
-        Variable<int16_t>* off_y
+        Variable<int32_t>* off_x, 
+        Variable<int32_t>* off_y
     ) {
         _src = src;
         _off_x = off_x;
@@ -35,8 +35,8 @@ public:
 
 protected:
     ColProc* _src;
-    Variable<int16_t>* _off_x; 
-    Variable<int16_t>* _off_y;
+    Variable<int32_t>* _off_x; 
+    Variable<int32_t>* _off_y;
 };
 
 #endif // MOVE_H

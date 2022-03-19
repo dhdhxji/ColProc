@@ -1,76 +1,108 @@
 #include "colproc/runtime/lua_runtime.h"
-#include "colproc/lua/bindings.h"
 
-#include "lauxlib.h"
+#include "lua.h"
 #include "lualib.h"
-#include "LuaBridge/LuaBridge.h"
+#include "lauxlib.h"
+#include "sol/sol.hpp"
+
+#include "colproc/lua/bindings.h"
+#include "colproc/runtime/ivariable_storage.h"
+
+
+
+class LuaVarStorage: public IVariableStorage {
+public:
+    LuaVarStorage(sol::state& s): _state(s) {};
+
+    virtual void addVariable(const std::string& name,  AbstractVariable* var) override {
+        _state[name] = var;
+        registerVar(name);
+    }
+
+    virtual AbstractVariable* getVariable(const std::string& name) const override {
+        AbstractVariable* val = _state[name];
+
+        return val;
+    }
+
+    virtual void updateVariables() override {
+        for(string name: _usedVars) {
+            getVariable(name)->updateValue();
+        }
+    }
+
+    virtual void clear() override  {
+        _usedVars.clear();
+    }
+
+    void registerVar(const std::string& name) {
+        _usedVars.insert(name);
+    }
+
+protected:
+    std::set<std::string> _usedVars;
+    sol::state& _state;
+};
+
 
 
 LuaRuntime::LuaRuntime(): 
-    Runtime(),
-    _state(colproc_build_lua_state())
-{}
+    Runtime()
+{
+    _state = new sol::state;
+    _varManager.reset(new LuaVarStorage(*_state));
+    colproc_build_lua_state(*_state, getVariableManager());
+}
+
+LuaRuntime::LuaRuntime(
+    Canvas* canvas,
+    uint32_t frameRate
+): 
+    Runtime(canvas, nullptr, frameRate)
+{
+    _state = new sol::state;
+    _varManager.reset(new LuaVarStorage(*_state));
+    colproc_build_lua_state(*_state, getVariableManager());
+}
 
 LuaRuntime::LuaRuntime(
     Canvas* canvas,
     uint32_t frameRate,
     std::string initScriptPath
 ): 
-    Runtime(canvas, nullptr, frameRate),
-    _state(colproc_build_lua_state())
+    Runtime(canvas, nullptr, frameRate)
 {
-    initRuntime(initScriptPath);
+    _state = new sol::state;
+    _varManager.reset(new LuaVarStorage(*_state));
+    colproc_build_lua_state(*_state, getVariableManager());
+    loadScript(initScriptPath);
 }
 
 LuaRuntime::~LuaRuntime() {
-    lua_gc(_state, LUA_GCCOLLECT, 0);
-    lua_close(_state);
+    delete _state;
 }
 
-//TODO: Implement cusom variable manager
-void LuaRuntime::initRuntime(std::string initScriptPath) {
-    int status = luaL_dofile(_state, initScriptPath.c_str());
-    if(status != 0) {
-        std::string errMsg = lua_tostring(_state, -1);
-        lua_pop(_state, 1);
 
-        throw std::runtime_error("[LUA]: Init script error: " + errMsg);
+void LuaRuntime::loadScript(std::string initScriptPath) {
+    _state->script_file(initScriptPath);
+
+    setRenderNode(getVar_s<ColProc>("RenderTree"));
+}
+
+template<class T> inline
+T* LuaRuntime::getVar_s(const std::string& name) {
+    if((*_state)[name] == sol::nil) {
+        throw std::runtime_error("Variable " + name + " is not set");
     }
     
-    auto rt = luabridge::getGlobal(_state, "RenderTree").cast<ColProc*>();
-    if(rt == nullptr) {
-        throw std::runtime_error("[LUA]: Root render node is not set");
+    T* res = (*_state)[name];
+
+    if(res == nullptr) {
+        throw std::runtime_error(
+            "Variable " + name + 
+            " has invalid type."    
+        );
     }
-    setRenderNode(rt);
-}
 
-LuaRuntime::LuaVarStorage::LuaVarStorage(lua_State* s): _state(s) {}
-
-void LuaRuntime::LuaVarStorage::addVariable(
-    const std::string& name,  AbstractVariable* var
-) {
-    luabridge::setGlobal<AbstractVariable*>(_state, var, name.c_str());
-    registerVar(name);
-}
-
-AbstractVariable* LuaRuntime::LuaVarStorage::getVariable(const std::string& name) const {
-    AbstractVariable* var = 
-        luabridge::getGlobal(_state, name.c_str()).cast<AbstractVariable*>();
-    
-    return var;
-}
-
-void LuaRuntime::LuaVarStorage::updateVariables() {
-    for(string name: _usedVars) {
-        luabridge::getGlobal(_state, name.c_str()).cast<AbstractVariable*>()
-            ->updateValue();
-    }
-}
-
-void LuaRuntime::LuaVarStorage::clear() {
-    _usedVars.clear();
-}
-
-void LuaRuntime::LuaVarStorage::registerVar(const std::string& name) {
-    _usedVars.insert(name);
+    return res;
 }

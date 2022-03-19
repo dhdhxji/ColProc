@@ -20,7 +20,7 @@ protected:
 public:
     Switch(
         std::vector<ColProc*> inputs,
-        Variable<uint32_t>* selector,
+        Variable<int32_t>* selector,
         Transition* transition
     ) {
         _inputs = inputs;
@@ -49,7 +49,7 @@ public:
 
 protected:
     std::vector<ColProc*>   _inputs;
-    Variable<uint32_t>*     _selector;
+    Variable<int32_t>*     _selector;
     Transition*             _transition;
     ColProc*                _prev_select;
 };

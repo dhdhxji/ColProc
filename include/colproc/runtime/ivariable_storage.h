@@ -14,6 +14,18 @@ public:
     virtual AbstractVariable* getVariable(const string& name) const = 0;
     virtual void updateVariables() = 0;
     virtual void clear() = 0;
+
+    virtual string addAnonymousVariable(AbstractVariable* var) {
+        string name = "_anonymous_" + anonymousVarCount;
+        anonymousVarCount++;
+
+        addVariable(name, var); 
+
+        return name;
+    }
+
+protected:
+    uint32_t anonymousVarCount = 0;
 };
 
 #endif // IVARIABLE_STORAGE_H

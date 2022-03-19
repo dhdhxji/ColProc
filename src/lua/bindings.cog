@@ -1,16 +1,11 @@
 #ifndef BINDINGS_H
 #define BINDINGS_H
 
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-
-#include "LuaBridge/LuaBridge.h"
-#include "LuaBridge/Vector.h"
-#include "LuaBridge/List.h"
-#include "LuaBridge/Map.h"
+#include <sol/sol.hpp>
 
 #include <string>
+#include <memory>
+
 using std::string;
 
 /*[[[cog
@@ -56,29 +51,20 @@ for include in includes:
 
 template_specs = {
     'Variable': (
-        'int', 
-        'int8_t', 'int16_t', 'int32_t', 'int64_t',
-        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
-        'float', 'double',
-        'char', 'bool', 'string'),
+        'int32_t', 'double', 'bool', 'string'
+    ),
 
     'VariableCallback': (
-        'int', 
-        'int8_t', 'int16_t', 'int32_t', 'int64_t',
-        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
-        'float', 'double',
-        'char', 'bool', 'string'),
+        'int32_t', 'double', 'bool', 'string'
+    ),
 
     'VariableConstant': (
-        'int', 
-        'int8_t', 'int16_t', 'int32_t', 'int64_t',
-        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
-        'float', 'double',
-        'char', 'bool', 'string')
+        'int32_t', 'double', 'bool', 'string'
+    )
 }
 
 exclude_class = (
-    'VariableCallback<T>',
+    #'VariableCallback<T>',
 )
 
 def is_template(typename: str) -> bool:
@@ -221,6 +207,23 @@ def bind_function_name(name):
 def untemplate(name):
     return name.replace("<", "_").replace(">", "")
 
+def find_class_by_name(name: str, classes):
+    for c in classes:
+        if c["className"] == name:
+            return c
+
+    return None
+
+def find_base_class_chain_recursive(name, classes) -> tuple:
+    c = find_class_by_name(name, classes)
+    if c is None:
+        return None
+
+    if "baseClass" in c:
+        return (c["baseClass"][0], *find_base_class_chain_recursive(c["baseClass"][0], classes))
+    else: 
+        return ()
+
 ]]]*/
 //[[[end]]]
 
@@ -239,16 +242,47 @@ for c in meta:
 ]]]*/
 //[[[end]]]
 
+// Variable constant converter
+template<class T>
+VariableConstant<T> v(const T& var) {
+    return VariableConstant<T>(var);
+}
+
+// Variable callback converter
+template<class T>
+std::unique_ptr<VariableCallback<T>> v(IVariableStorage* storage, sol::function cb) {
+    VariableCallback<T>* var = new VariableCallback<T>([cb](){
+        return cb();
+    } );
+
+    storage->addAnonymousVariable(var);
+
+    return std::unique_ptr< VariableCallback<T> >(var);
+}
+
+template<class T>
+Variable<T>* cast(AbstractVariable* var) {
+    return *var;
+}
+
+std::vector<ColProc*> colprocVec(sol::variadic_args args) {
+    std::vector<ColProc*> vec;
+    for(auto item: args) {
+        vec.push_back(item);
+    }
+
+    return vec;
+}
 
 /*[[[cog
-cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
+cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStorage& storage) ')
 ]]]*/
 //[[[end]]]
 {
-    lua_State* luaState = luaL_newstate();
-    luaL_openlibs(luaState);
+    //TODO
+    //lua.open_libraries(sol::lib::*);
 
-    luabridge::getGlobalNamespace(luaState)
+    lua.new_usertype<AbstractVariable>("AbstractVariable", "new", sol::no_constructor);
 
     /*[[[cog
     ########################
@@ -256,39 +290,116 @@ cog.outl(f'lua_State* {builder_fn_name}_build_lua_state() ')
     ########################
 
     for c in classes_to_bind:
+        # Put class declaration
+        cog.outl(f'lua.new_usertype<{c["className"]}>( \n\t"{untemplate(c["className"])}"')
+
+        # Put the methods
+        if 'methods' in c.keys():
+
+            # Group functions with the same name (for overloading)
+            methods = {}
+            for m in c['methods']:
+                if m['name'] not in methods.keys():
+                     methods[m['name']] = []
+
+                methods[m['name']].append(m)
+
+            for name, value in methods.items():
+                if len(value) >= 2:
+                    # gen overloads
+                    cog.outl(f'\t, "{bind_function_name(name)}", sol::overload(')
+                    
+                    func_spec_list = []
+                    for m in value:
+                        if m['access'] != 'public':
+                            continue
+                    
+                        args = [t['type'] for t in m['arguments']]
+                        func_spec = f'static_cast<{m["returnType"]}({c["className"]}::*)( {",".join(args)} )>( &{c["className"]}::{m["name"]} )'
+                        func_spec_list.append(func_spec)
+
+                    cog.outl(f'\t {", ".join(func_spec_list)}')
+                    
+                    cog.outl('\t )')
+
+                else:
+                    # gen method
+                    m = value[0]
+                    if m['access'] != 'public':
+                        continue
+
+                    cog.outl(f'\t, "{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]}')
+
+        # Put base classes
         if 'baseClass' in c.keys():
-            cog.outl(f'.deriveClass<{c["className"]}, {c["baseClass"][0]}>("{untemplate(c["className"])}")')
-        else:
-            cog.outl(f'.beginClass<{c["className"]}>("{untemplate(c["className"])}")')
-            
-        
+            # Find base classes recursively
+            base_class_types = find_base_class_chain_recursive(c['className'], classes_to_bind)
+
+            base_class_sol = f'sol::bases<{", ".join(base_class_types)}>()'
+            cog.outl(f'\t, sol::base_classes, {base_class_sol}')
+
+        # Put the constructors
         if not c['isAbstract']:
-            constr = find_longest_public_constructor(c['constructors'])
-            if constr is not None:
-                cog.outl(f'.addConstructor<void(*)({ ", ".join([arg["type"] for arg in constr["arguments"]]) })>()')
+            if len(c['constructors']) == 0:
+                cog.outl("\t//No constructors available")
+                cog.outl('\t, "new", sol::no_constructor')
+            else:
+                constr_spec = list()
+                for co in c['constructors']:
+                    if co['access'] != 'public':
+                        continue
+                    
+                    args = [t['type'] for t in co['arguments']]
+                    constr_spec.append(f'{c["className"]}({", ".join(args)})')
+                
+                cog.outl(f'\t, "new", sol::constructors<{", ".join(constr_spec)}>()')
+        else:
+            cog.outl('\t//It is abstract class, do not bind constructors')
+            cog.outl('\t, "new", sol::no_constructor')
+        
+        # TODO
+        # Put all properties
+        
 
-        for m in c['methods']:
-            if m['access'] != 'public':
-                continue
-
-            types = ', '.join(arg['type'] for arg in ({'type': m['returnType']}, *m['arguments']))
-            cog.outl(f'.addFunction<{types}>("{bind_function_name(m["name"])}", &{c["className"]}::{m["name"]})')
-
-        for f in c['fields']:
-            if f['access'] != 'public':
-                continue
-
-            cog.outl(f'.addData<{f["type"]}>("{f["name"]}", &{c["className"]}::{f["name"]})')
-
-        cog.outl('.endClass()')
-
+        cog.outl(');')
     ]]]*/
     //[[[end]]]
-    ;
+
+    lua["v"] = sol::overload(
+        /*[[[cog
+        cog.outl( ',\n'.join(f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)' for t in template_specs['VariableConstant']) )
+        ]]]*/
+        //[[[end]]]     
+    );
+
+    /*[[[cog
+    #Gen vx converters
+
+    for t in template_specs['VariableCallback']:
+        name = f'v{t[0]}'
+        cb_func = f'static_cast<std::unique_ptr<VariableCallback<{t}>>(*)(IVariableStorage*, sol::function)>(&v<{t}>)'
+        cb_bind_func = f'[&storage](sol::function cb){{ return {cb_func}(&storage, cb); }}'
+
+        const_func = f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)'
+
+        cog.outl(f'lua["{name}"] = sol::overload( {cb_bind_func}, {const_func} );')
+    ]]]*/
+    //[[[end]]]
+
+    /*[[[cog
+    #Gen cast converters
+
+    for t in template_specs['VariableCallback']:
+        name = f'vcast{t[0]}'
+        cb_func = f'static_cast<Variable<{t}>*(*)(AbstractVariable*)>(&cast<{t}>)'
+
+        cog.outl(f'lua["{name}"] = {cb_func};')
+    ]]]*/
+    //[[[end]]]
+
+    lua["colprocVec"] = &colprocVec;
 
     // Add Info about available classes/funcs/vars to lua
-
-    return luaState;
 }
 
 #endif // BINDINGS_H

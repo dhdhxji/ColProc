@@ -2,12 +2,11 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.10.5)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_C_STANDARD 99)
-
 project(colproc)
 
 add_library(${PROJECT_NAME})
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 # Core
 target_include_directories(
@@ -21,7 +20,7 @@ target_include_directories(
 #)
 
 target_sources(
-    ${PROJECT_NAME} PUBLIC
+    ${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/util/util.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/runtime.cpp"
@@ -37,8 +36,8 @@ include("CPM.cmake")
 add_subdirectory(src/lua)
 target_link_libraries(${PROJECT_NAME} liblua)
 
-CPMAddPackage("gh:vinniefalco/LuaBridge#2.6")
-target_link_libraries(${PROJECT_NAME} LuaBridge)
+CPMAddPackage("gh:ThePhD/sol2@3.2.3")
+target_link_libraries(${PROJECT_NAME} sol2)
 
 add_subdirectory("src/mcufont")
 target_link_libraries(colproc mcufont)

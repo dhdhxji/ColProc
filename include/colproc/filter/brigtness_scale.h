@@ -7,7 +7,7 @@
 class BrightnessScale: public Filter
 {
 public: 
-    BrightnessScale(ColProc* src, Variable<float>* br_divider)
+    BrightnessScale(ColProc* src, Variable<double>* br_divider)
     :Filter(src) {
         _br_divider = br_divider;
     }
@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    Variable<float>* _br_divider;
+    Variable<double>* _br_divider;
 };
 
 #endif // BRIGTNESS_SCALE_H
