@@ -62,7 +62,7 @@ template_specs = {
 }
 
 exclude_class = (
-    'VariableCallback<T>',
+    #'VariableCallback<T>',
 )
 
 def is_template(typename: str) -> bool:
@@ -240,10 +240,18 @@ for c in meta:
 ]]]*/
 //[[[end]]]
 
-template<class T, class Var>
-Var v(const T& var) {
-    printf("%s\n", typeid(T).name());
-    return Var(var);
+// Variable constant converter
+template<class T>
+VariableConstant<T> v(const T& var) {
+    return VariableConstant<T>(var);
+}
+
+// Variable callback converter
+template<class T>
+VariableCallback<T> v(sol::function cb) {
+    return VariableCallback<T>([cb](){
+        return cb();
+    });
 }
 
 /*[[[cog
@@ -337,14 +345,22 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
 
     lua["v"] = sol::overload(
         /*[[[cog
-        cog.outl( ',\n'.join(f'&v<{t}, VariableConstant<{t}>>' for t in template_specs['VariableConstant']) )
+        cog.outl( ',\n'.join(f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)' for t in template_specs['VariableConstant']) )
         ]]]*/
-        //[[[end]]]
-        
-        //static_cast< VariableConstant<std::string>(*)(std::string) >( &v ),
-        //static_cast<VariableConstant<uint32_t>(*)(uint32_t)>( &v )//,
-        //static_cast<VariableConstant<uint8_t>(*)(uint8_t)>( &v )        
+        //[[[end]]]     
     );
+
+    /*[[[cog
+    #Gen vx converters
+
+    for t in template_specs['VariableCallback']:
+        name = f'v{t[0]}'
+        cog.outl(f'lua["{name}"] = sol::overload( static_cast<VariableCallback<{t}>(*)(sol::function)>(&v<{t}>), static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>) );')
+
+        #cog.outl( ',\n'.join(f'&v{t[0]}<{t}>' for t in template_specs['VariableConstant']) )
+    ]]]*/
+    //[[[end]]]
+
 
     // Add Info about available classes/funcs/vars to lua
 }
