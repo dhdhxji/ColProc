@@ -250,14 +250,18 @@ VariableConstant<T> v(const T& var) {
 
 // Variable callback converter
 template<class T>
-std::unique_ptr<VariableCallback<T>> v(sol::function cb) {
-    return std::make_unique< VariableCallback<T> >([cb](){
+std::unique_ptr<VariableCallback<T>> v(IVariableStorage* storage, sol::function cb) {
+    VariableCallback<T>* var = new VariableCallback<T>([cb](){
         return cb();
     } );
+
+    storage->addAnonymousVariable(var);
+
+    return std::unique_ptr< VariableCallback<T> >(var);
 }
 
 /*[[[cog
-cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
+cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStorage& storage) ')
 ]]]*/
 //[[[end]]]
 {
@@ -357,9 +361,12 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua) ')
 
     for t in template_specs['VariableCallback']:
         name = f'v{t[0]}'
-        cog.outl(f'lua["{name}"] = sol::overload( static_cast<std::unique_ptr<VariableCallback<{t}>>(*)(sol::function)>(&v<{t}>), static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>) );')
+        cb_func = f'static_cast<std::unique_ptr<VariableCallback<{t}>>(*)(IVariableStorage*, sol::function)>(&v<{t}>)'
+        cb_bind_func = f'[&storage](sol::function cb){{ return {cb_func}(&storage, cb); }}'
 
-        #cog.outl( ',\n'.join(f'&v{t[0]}<{t}>' for t in template_specs['VariableConstant']) )
+        const_func = f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)'
+
+        cog.outl(f'lua["{name}"] = sol::overload( {cb_bind_func}, {const_func} );')
     ]]]*/
     //[[[end]]]
 

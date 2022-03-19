@@ -50,7 +50,7 @@ LuaRuntime::LuaRuntime():
     Runtime()
 {
     _state = new sol::state;
-    colproc_build_lua_state(*_state);
+    colproc_build_lua_state(*_state, getVariableManager());
 }
 
 LuaRuntime::LuaRuntime(
@@ -61,7 +61,7 @@ LuaRuntime::LuaRuntime(
     Runtime(canvas, nullptr, frameRate)
 {
     _state = new sol::state;
-    colproc_build_lua_state(*_state);
+    colproc_build_lua_state(*_state, getVariableManager());
     initRuntime(initScriptPath);
 }
 
