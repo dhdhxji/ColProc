@@ -260,6 +260,11 @@ std::unique_ptr<VariableCallback<T>> v(IVariableStorage* storage, sol::function 
     return std::unique_ptr< VariableCallback<T> >(var);
 }
 
+template<class T>
+Variable<T>* cast(AbstractVariable* var) {
+    return *var;
+}
+
 /*[[[cog
 cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStorage& storage) ')
 ]]]*/
@@ -267,6 +272,8 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStor
 {
     //TODO
     //lua.open_libraries(sol::lib::*);
+
+    lua.new_usertype<AbstractVariable>("AbstractVariable", "new", sol::no_constructor);
 
     /*[[[cog
     ########################
@@ -370,6 +377,16 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStor
     ]]]*/
     //[[[end]]]
 
+    /*[[[cog
+    #Gen cast converters
+
+    for t in template_specs['VariableCallback']:
+        name = f'vcast{t[0]}'
+        cb_func = f'static_cast<Variable<{t}>*(*)(AbstractVariable*)>(&cast<{t}>)'
+
+        cog.outl(f'lua["{name}"] = {cb_func};')
+    ]]]*/
+    //[[[end]]]
 
     // Add Info about available classes/funcs/vars to lua
 }
