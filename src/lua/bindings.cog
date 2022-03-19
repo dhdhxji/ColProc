@@ -265,6 +265,15 @@ Variable<T>* cast(AbstractVariable* var) {
     return *var;
 }
 
+std::vector<ColProc*> colprocVec(sol::variadic_args args) {
+    std::vector<ColProc*> vec;
+    for(auto item: args) {
+        vec.push_back(item);
+    }
+
+    return vec;
+}
+
 /*[[[cog
 cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStorage& storage) ')
 ]]]*/
@@ -387,6 +396,8 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStor
         cog.outl(f'lua["{name}"] = {cb_func};')
     ]]]*/
     //[[[end]]]
+
+    lua["colprocVec"] = &colprocVec;
 
     // Add Info about available classes/funcs/vars to lua
 }
