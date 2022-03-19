@@ -13,13 +13,18 @@ public:
 
     LuaRuntime(
         Canvas* canvas,
+        uint32_t frameRate
+    );
+
+    LuaRuntime(
+        Canvas* canvas,
         uint32_t frameRate,
         std::string initScriptPath
     );
 
     virtual ~LuaRuntime();
 
-    void initRuntime(std::string initScriptPath);
+    void loadScript(std::string initScriptPath);
 
 protected:
     template<class T> inline

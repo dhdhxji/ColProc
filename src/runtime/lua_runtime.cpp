@@ -50,6 +50,18 @@ LuaRuntime::LuaRuntime():
     Runtime()
 {
     _state = new sol::state;
+    _varManager.reset(new LuaVarStorage(*_state));
+    colproc_build_lua_state(*_state, getVariableManager());
+}
+
+LuaRuntime::LuaRuntime(
+    Canvas* canvas,
+    uint32_t frameRate
+): 
+    Runtime(canvas, nullptr, frameRate)
+{
+    _state = new sol::state;
+    _varManager.reset(new LuaVarStorage(*_state));
     colproc_build_lua_state(*_state, getVariableManager());
 }
 
@@ -61,8 +73,9 @@ LuaRuntime::LuaRuntime(
     Runtime(canvas, nullptr, frameRate)
 {
     _state = new sol::state;
+    _varManager.reset(new LuaVarStorage(*_state));
     colproc_build_lua_state(*_state, getVariableManager());
-    initRuntime(initScriptPath);
+    loadScript(initScriptPath);
 }
 
 LuaRuntime::~LuaRuntime() {
@@ -70,7 +83,7 @@ LuaRuntime::~LuaRuntime() {
 }
 
 
-void LuaRuntime::initRuntime(std::string initScriptPath) {
+void LuaRuntime::loadScript(std::string initScriptPath) {
     _state->script_file(initScriptPath);
 
     setRenderNode(getVar_s<ColProc>("RenderTree"));
