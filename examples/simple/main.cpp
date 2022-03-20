@@ -119,8 +119,8 @@ static ColProc* build_processor(IVariableStorage& storage) {
             new VariableConstant<std::string>(":"),
             new VariableConstant<std::string>("3_by_57")
         ),
-        new VariableConstant<int16_t>(7),
-        new VariableConstant<int16_t>(0)
+        new VariableConstant<int32_t>(7),
+        new VariableConstant<int32_t>(0)
     );
 
     ColProc* min = new Move(
@@ -128,35 +128,35 @@ static ColProc* build_processor(IVariableStorage& storage) {
             storage.getVariable("mins")->castToVariable<std::string>(),
             new VariableConstant<std::string>("3_by_57")
         ),
-        new VariableConstant<int16_t>(10),
-        new VariableConstant<int16_t>(0)
+        new VariableConstant<int32_t>(10),
+        new VariableConstant<int32_t>(0)
     );
 
     ColProc* text = new Concat({hrs, dash, min});
 
     ColProc* moved_text = new Move(
         text,
-        new VariableConstant<int16_t>(1),
-        new VariableConstant<int16_t>(1)
+        new VariableConstant<int32_t>(1),
+        new VariableConstant<int32_t>(1)
     );
 
     ColProc* rainbow = new GeneratorRainbow(
-        new VariableConstant<uint32_t>(50),
-        new VariableConstant<uint32_t>(0),
-        new VariableConstant<uint32_t>(5000)
+        new VariableConstant<int32_t>(50),
+        new VariableConstant<int32_t>(0),
+        new VariableConstant<int32_t>(5000)
     );
     
     ColProc* mixed_text = new Mixer(rainbow, moved_text);
 
     ColProc* switched = new Switch(
         {mixed_text, rainbow},
-        storage.getVariable("rainbow_text_select")->castToVariable<uint32_t>(),
+        storage.getVariable("rainbow_text_select")->castToVariable<int32_t>(),
         new TransitionSimple()
     );
 
     return new BrightnessScale(
         switched, 
-        new VariableConstant<float>(1)
+        new VariableConstant<double>(1)
     );
 }
 
@@ -172,9 +172,9 @@ int main(int argc, char** argv)
     
     rt.getVariableManager().addVariable(
         "rainbow_text_select",
-        new VariableCallback<uint32_t>(
+        new VariableCallback<int32_t>(
             []() {
-                uint32_t time_ms = 
+                int32_t time_ms = 
                     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
                 return (time_ms/1000) % 2;
             }
