@@ -51,20 +51,20 @@ for include in includes:
 
 template_specs = {
     'Variable': (
-        'int32_t', 'double', 'bool', 'string'
+        'int32_t', 'double', 'string'
     ),
 
     'VariableCallback': (
-        'int32_t', 'double', 'bool', 'string'
+        'int32_t', 'double', 'string'
     ),
 
     'VariableConstant': (
-        'int32_t', 'double', 'bool', 'string'
+        'int32_t', 'double', 'string'
     )
 }
 
 exclude_class = (
-    #'VariableCallback<T>',
+    'VariableCallback<T>', 'VariableConstant<T>'
 )
 
 def is_template(typename: str) -> bool:
@@ -244,13 +244,13 @@ for c in meta:
 
 // Variable constant converter
 template<class T>
-VariableConstant<T> v(const T& var) {
-    return VariableConstant<T>(var);
+std::unique_ptr<Variable<T>> v(const T& var) {
+    return std::unique_ptr<VariableConstant<T>>(new VariableConstant<T>(var));
 }
 
 // Variable callback converter
 template<class T>
-std::unique_ptr<VariableCallback<T>> v(IVariableStorage* storage, sol::function cb) {
+std::unique_ptr<Variable<T>> v(IVariableStorage* storage, sol::function cb) {
     VariableCallback<T>* var = new VariableCallback<T>([cb](){
         return cb();
     } );
@@ -367,7 +367,7 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStor
 
     lua["v"] = sol::overload(
         /*[[[cog
-        cog.outl( ',\n'.join(f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)' for t in template_specs['VariableConstant']) )
+        cog.outl( ',\n'.join(f'static_cast<std::unique_ptr<Variable<{t}>>(*)(const {t}&)>(&v<{t}>)' for t in template_specs['VariableConstant']) )
         ]]]*/
         //[[[end]]]     
     );
@@ -377,10 +377,10 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStor
 
     for t in template_specs['VariableCallback']:
         name = f'v{t[0]}'
-        cb_func = f'static_cast<std::unique_ptr<VariableCallback<{t}>>(*)(IVariableStorage*, sol::function)>(&v<{t}>)'
+        cb_func = f'static_cast<std::unique_ptr<Variable<{t}>>(*)(IVariableStorage*, sol::function)>(&v<{t}>)'
         cb_bind_func = f'[&storage](sol::function cb){{ return {cb_func}(&storage, cb); }}'
 
-        const_func = f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)'
+        const_func = f'static_cast<std::unique_ptr<Variable<{t}>>(*)(const {t}&)>(&v<{t}>)'
 
         cog.outl(f'lua["{name}"] = sol::overload( {cb_bind_func}, {const_func} );')
     ]]]*/
