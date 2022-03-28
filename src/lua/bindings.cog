@@ -51,20 +51,20 @@ for include in includes:
 
 template_specs = {
     'Variable': (
-        'int32_t', 'double', 'bool', 'string'
+        'int32_t', 'double', 'string'
     ),
 
     'VariableCallback': (
-        'int32_t', 'double', 'bool', 'string'
+        'int32_t', 'double', 'string'
     ),
 
     'VariableConstant': (
-        'int32_t', 'double', 'bool', 'string'
+        'int32_t', 'double', 'string'
     )
 }
 
 exclude_class = (
-    #'VariableCallback<T>',
+    'VariableCallback<T>',
 )
 
 def is_template(typename: str) -> bool:
@@ -250,7 +250,7 @@ VariableConstant<T> v(const T& var) {
 
 // Variable callback converter
 template<class T>
-std::unique_ptr<VariableCallback<T>> v(IVariableStorage* storage, sol::function cb) {
+std::unique_ptr<Variable<T>> v(IVariableStorage* storage, sol::function cb) {
     VariableCallback<T>* var = new VariableCallback<T>([cb](){
         return cb();
     } );
@@ -377,7 +377,7 @@ cog.outl(f'void {builder_fn_name}_build_lua_state(sol::state& lua, IVariableStor
 
     for t in template_specs['VariableCallback']:
         name = f'v{t[0]}'
-        cb_func = f'static_cast<std::unique_ptr<VariableCallback<{t}>>(*)(IVariableStorage*, sol::function)>(&v<{t}>)'
+        cb_func = f'static_cast<std::unique_ptr<Variable<{t}>>(*)(IVariableStorage*, sol::function)>(&v<{t}>)'
         cb_bind_func = f'[&storage](sol::function cb){{ return {cb_func}(&storage, cb); }}'
 
         const_func = f'static_cast<VariableConstant<{t}>(*)(const {t}&)>(&v<{t}>)'
