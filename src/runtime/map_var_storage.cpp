@@ -1,5 +1,9 @@
 #include "colproc/runtime/map_var_storage.h"
 
+MapVarStorage::~MapVarStorage() {
+    clear();
+}
+
 void MapVarStorage::addVariable(const string& name, AbstractVariable* var) {
     auto it = _storage.find(name);
     if(it != _storage.end()) {

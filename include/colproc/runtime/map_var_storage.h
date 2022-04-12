@@ -8,6 +8,8 @@
 
 class MapVarStorage: public IVariableStorage {
 public: 
+    ~MapVarStorage();
+
     virtual void addVariable(const string& name,  AbstractVariable* var) override;
     virtual AbstractVariable* getVariable(const string& name) const override;
     virtual void updateVariables() override;
