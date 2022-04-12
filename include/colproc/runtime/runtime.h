@@ -12,9 +12,9 @@ class Runtime {
 
 public:
     enum stop_reason_t {
-        EXCEPTION,
-        INTERRUPT,
-        INTERNAL_ERROR
+        RT_EXCEPTION,
+        RT_INTERRUPT,
+        RT_INTERNAL_ERROR
     };
 
     Runtime();

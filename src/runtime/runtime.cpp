@@ -76,7 +76,7 @@ Runtime::stop_reason_t Runtime::runRenderLoop() {
 
     for(;;) {
         if(_interrupted.load()) {
-            return INTERRUPT;
+            return RT_INTERRUPT;
         }
 
         const auto frameStart = system_clock::now();
@@ -91,7 +91,7 @@ Runtime::stop_reason_t Runtime::runRenderLoop() {
             _canvas->display();
             _canvas->clear();
         } catch(...) {
-            return EXCEPTION;
+            return RT_EXCEPTION;
         }
 
         const auto frameEnd = std::chrono::system_clock::now();
