@@ -67,7 +67,7 @@ set(BINDIGS_DIR ${CODEGEN_DIR}/lua)
 
 add_custom_command(
     OUTPUT "${BINDIGS_DIR}/bindings.h"
-    COMMAND cog 
+    COMMAND python3 -m cogapp 
         -D builder_fn_name=colproc 
         -D class_meta_path=colproc/classes.json 
         -o "${BINDIGS_DIR}/bindings.h"
