@@ -22,6 +22,7 @@ target_include_directories(
 target_sources(
     ${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/util/util.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/util/error.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/core/canvas/canvas.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/runtime.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/lua_runtime.cpp"
