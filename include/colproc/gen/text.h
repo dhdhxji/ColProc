@@ -3,10 +3,12 @@
 
 #include "colproc/gen/generator.h"
 #include "colproc/variable/variable.h"
+#include "colproc/util/error.hpp"
 #include "mcufont.h"
 #include <string>
 #include <stdexcept>
 
+using namespace std::string_literals;
 
 class GeneratorText: public Generator
 {
@@ -35,13 +37,7 @@ public:
         };
         
         const mf_font_s* font = mf_find_font(_font->getValue().c_str());
-        if(font == nullptr) {
-            throw std::runtime_error(
-                std::string("Font \"") +
-                _font->getValue() + 
-                "\" not found" 
-            );
-        }
+        ERR_CHECK_NOT_NULL(font, "Font \""s + _font->getValue() + "\" not found"s);
         
         mf_render_aligned(
             font, 

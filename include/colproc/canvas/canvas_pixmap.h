@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <map>
 #include <functional>
+#include "colproc/util/error.hpp"
 
 class CanvasPixMap: public Canvas {
 public:
@@ -50,7 +51,7 @@ public:
     };
 
     virtual void display() const override {
-        throw std::runtime_error("CanvasPixMax: display call not allowed");
+        spawnError("CanvasPixMax: display call not allowed");
     }
 
     void traverseSetPixels(std::function<void(uint16_t, uint16_t)> cb) {

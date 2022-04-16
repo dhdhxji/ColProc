@@ -4,21 +4,22 @@
 #include <typeinfo>
 #include <string>
 #include <stdexcept>
+#include "colproc/util/error.hpp"
 
 template <typename T>
 class Variable;
+
+using namespace std::string_literals;
 
 class AbstractVariable {
 public:
     virtual ~AbstractVariable() {};
 
     template <typename T> Variable<T>* castToVariable() {
-        if(getVariableType() != typeid(T)) {
-            throw std::runtime_error(
-                std::string("Incompatimble variable type. Expected: ") + 
-                typeid(T).name() + "; Actual: " + getVariableType().name()
-            );
-        }
+        ERR_ASSERT_TRUE(
+            getVariableType() == typeid(T),
+            "Incompatimble variable type. Expected: "s + typeid(T).name() + "; Actual: "s + getVariableType().name()
+        );
 
         return dynamic_cast<Variable<T>*>(this);
     }

@@ -2,6 +2,7 @@
 #define TRANSITION_H
 
 #include "colproc/colproc.h"
+#include "colproc/util/error.hpp"
 #include <queue>
 #include <stdexcept>
 
@@ -36,10 +37,7 @@ public:
         uint32_t time,
         Canvas* canvas
     ) override {
-        if(_transition_queue.empty()) {
-            throw std::runtime_error("Transition: There is no"
-                "transitions to be displayed");
-        }
+        ERR_ASSERT_FALSE(_transition_queue.empty(), "Transition: There is no transitions to be displayed");
 
         const TransEntry& current_trans = _transition_queue.front();
 

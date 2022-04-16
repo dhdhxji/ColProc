@@ -11,6 +11,7 @@
 #include "colproc/switch/transition_simple.h"
 #include "colproc/mod/concat.h"
 #include "colproc/runtime/runtime.h"
+#include "colproc/util/error.hpp"
 
 #include <chrono>
 
@@ -21,6 +22,7 @@
 
 
 using namespace std::chrono;
+using namespace std::string_literals;
 
 
 class CanvasConsole: public Canvas
@@ -41,32 +43,20 @@ public:
     }
 
     void setPix(size_t x, size_t y, ColRGB col) override {
-        if(x >= getW() || y >= getH()) {
-            throw std::runtime_error(
-                std::string("Out of bounds in setPix(") + 
-                std::to_string(x) + 
-                ";" + 
-                std::to_string(y) + 
-                ")"
-            );
-            return;
-        }
+        ERR_ASSERT_FALSE(
+            x >= getW() || y >= getH(), 
+            "Out of bounds in setPix("s + std::to_string(x) + ";"s + std::to_string(y) + ")"s
+        );
         size_t index = y*getW() + x;
 
         _canvas[index] = col;
     }
 
     ColRGB getPix(size_t x, size_t y) const override {
-        if(x >= getW() || y >= getH()) { 
-            throw std::runtime_error(
-                std::string("Out of bounds in getPix(") + 
-                std::to_string(x) + 
-                ";" + 
-                std::to_string(y) + 
-                ")"
-            );
-            return ColRGB(0,0,0);
-        }
+        ERR_ASSERT_FALSE(
+            x >= getW() || y >= getH(), 
+            "Out of bounds in getPix("s + std::to_string(x) + ";"s + std::to_string(y) + ")"s
+        );
         size_t index = y*getW() + x;
 
         return _canvas[index];

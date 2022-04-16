@@ -3,13 +3,15 @@
 #include <string>
 #include "colproc/runtime/lua_runtime.h"
 #include "colproc/variable/variable_callback.h"
-
+#include "colproc/util/error.hpp"
 
 
 #define REFRESH_RATE_HZ 30
 #define MATRIX_W        19
 #define MATRIX_H        7
 
+
+using namespace std::string_literals;
 
 
 class CanvasConsole: public Canvas
@@ -30,32 +32,20 @@ public:
     }
 
     void setPix(size_t x, size_t y, ColRGB col) override {
-        if(x >= getW() || y >= getH()) {
-            throw std::runtime_error(
-                std::string("Out of bounds in setPix(") + 
-                std::to_string(x) + 
-                ";" + 
-                std::to_string(y) + 
-                ")"
-            );
-            return;
-        }
+        ERR_ASSERT_FALSE(
+            x >= getW() || y >= getH(), 
+            "Out of bounds in setPix("s + std::to_string(x) + ";"s + std::to_string(y) + ")"s
+        );
         size_t index = y*getW() + x;
 
         _canvas[index] = col;
     }
 
     ColRGB getPix(size_t x, size_t y) const override {
-        if(x >= getW() || y >= getH()) { 
-            throw std::runtime_error(
-                std::string("Out of bounds in getPix(") + 
-                std::to_string(x) + 
-                ";" + 
-                std::to_string(y) + 
-                ")"
-            );
-            return ColRGB(0,0,0);
-        }
+        ERR_ASSERT_FALSE(
+            x >= getW() || y >= getH(), 
+            "Out of bounds in getPix("s + std::to_string(x) + ";"s + std::to_string(y) + ")"s
+        );
         size_t index = y*getW() + x;
 
         return _canvas[index];

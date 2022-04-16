@@ -7,6 +7,7 @@
 
 #include "colproc/lua/bindings.h"
 #include "colproc/runtime/ivariable_storage.h"
+#include "colproc/util/error.hpp"
 
 
 
@@ -91,18 +92,11 @@ void LuaRuntime::loadScript(std::string initScriptPath) {
 
 template<class T> inline
 T* LuaRuntime::getVar_s(const std::string& name) {
-    if((*_state)[name] == sol::nil) {
-        throw std::runtime_error("Variable " + name + " is not set");
-    }
-    
+    ERR_ASSERT_FALSE((*_state)[name] == sol::nil, "Variable " + name + " is not set");
+  
     T* res = (*_state)[name];
 
-    if(res == nullptr) {
-        throw std::runtime_error(
-            "Variable " + name + 
-            " has invalid type."    
-        );
-    }
+    ERR_CHECK_NOT_NULL(res, "Variable " + name + " has invalid type.");
 
     return res;
 }

@@ -1,17 +1,14 @@
 #include "colproc/runtime/map_var_storage.h"
 
+#include "colproc/util/error.hpp"
+
 MapVarStorage::~MapVarStorage() {
     clear();
 }
 
 void MapVarStorage::addVariable(const string& name, AbstractVariable* var) {
     auto it = _storage.find(name);
-    if(it != _storage.end()) {
-        throw std::runtime_error(
-            std::string("Variable: Variable \"") + name + 
-            "\" already exists"
-        );
-    }
+    ERR_ASSERT_TRUE(it == _storage.end(), "Variable: Variable \"" + name + "\" already exists");
 
     _storage.insert(
         std::make_pair(name, (AbstractVariable*)var)
@@ -20,12 +17,7 @@ void MapVarStorage::addVariable(const string& name, AbstractVariable* var) {
 
 AbstractVariable* MapVarStorage::getVariable(const string& name) const {
     auto it = _storage.find(name);
-    if(it == _storage.end()) {
-        throw std::runtime_error(
-            std::string("Variable: Unable to find variable \"")+
-            name + "\""
-        );
-    };
+    ERR_ASSERT_FALSE(it == _storage.end(), "Variable: Unable to find variable \"" + name + "\"");
 
     return it->second;
 }
