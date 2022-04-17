@@ -7,6 +7,7 @@
 #include "mcufont.h"
 #include <string>
 #include <stdexcept>
+#include "colproc/util/error.hpp"
 
 using namespace std::string_literals;
 
@@ -14,6 +15,9 @@ class GeneratorText: public Generator
 {
 public:
     GeneratorText(Variable<std::string>* text, Variable<std::string>* font) {
+        ERR_CHECK_NOT_NULL(text, "GeneratorText: text is NULL");
+        ERR_CHECK_NOT_NULL(font, "GeneratorText: font is NULL");
+
         _text = text;
         _font = font;
     }

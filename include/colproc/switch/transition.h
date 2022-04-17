@@ -16,6 +16,9 @@ protected:
         uint32_t start_time;
 
         TransEntry(ColProc* from, ColProc* to, uint32_t start_time) {
+            ERR_CHECK_NOT_NULL(from, "TransEntry: from is NULL");
+            ERR_CHECK_NOT_NULL(to, "TransEntry: to is NULL");
+
             TransEntry::from = from;
             TransEntry::to = to;
             TransEntry::start_time = start_time;
@@ -37,6 +40,7 @@ public:
         uint32_t time,
         Canvas* canvas
     ) override {
+        ERR_CHECK_NOT_NULL(canvas, "Transition: canvas is NULL");
         ERR_ASSERT_FALSE(_transition_queue.empty(), "Transition: There is no transitions to be displayed");
 
         const TransEntry& current_trans = _transition_queue.front();

@@ -3,12 +3,15 @@
 
 #include "filter.h"
 #include "colproc/variable/variable.h"
+#include "colproc/util/error.hpp"
 
 class BrightnessScale: public Filter
 {
 public: 
     BrightnessScale(ColProc* src, Variable<double>* br_divider)
     :Filter(src) {
+        ERR_CHECK_NOT_NULL(src, "BrightnessScale: src is NULL");
+        ERR_CHECK_NOT_NULL(br_divider, "BrightnessScale: br_divider is NULL");
         _br_divider = br_divider;
     }
 
@@ -16,6 +19,7 @@ public:
         uint32_t time, 
         Canvas* canvas
     ) override {
+        ERR_CHECK_NOT_NULL(canvas, "BrightnessScale: canvas is NULL");
         if(_br_divider == 0) {return;}
         
         for(size_t y = 0; y < canvas->getH(); ++y) {

@@ -3,11 +3,13 @@
 
 #include "../colproc.h"
 #include "colproc/canvas/canvas.h"
+#include "colproc/util/error.hpp"
 
 class Filter: public ColProc 
 {
 public: 
     Filter(ColProc* src) {
+        ERR_CHECK_NOT_NULL(src, "Filter: src is NULL");
         _src = src;
     }
 
@@ -22,6 +24,7 @@ public:
         uint32_t time,
         Canvas* canvas
     ) override {
+        ERR_CHECK_NOT_NULL(canvas, "Filter: canvas is NULL");
         _src->render(off_x, off_y, time, canvas);
         filter(time, canvas);
     }

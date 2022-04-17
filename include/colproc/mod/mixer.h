@@ -3,6 +3,7 @@
 
 #include "colproc/colproc.h"
 #include "colproc/canvas/canvas_pixmap.h"
+#include "colproc/util/error.hpp"
 
 class Mixer: public ColProc {
 public: 
@@ -10,6 +11,8 @@ public:
         ColProc* src,
         ColProc* mask
     ) {
+        ERR_CHECK_NOT_NULL(src, "Mixer: src is NULL");
+        ERR_CHECK_NOT_NULL(mask, "Mixer: mask is NULL");
         _src = src;
         _mask = mask;
     }
@@ -20,6 +23,7 @@ public:
         uint32_t time,
         Canvas* canvas
     ) {
+        ERR_CHECK_NOT_NULL(canvas, "Mixer: canvas is NULL");
         CanvasPixMap mask_cv(canvas->getW(), canvas->getH());
         CanvasPixMap src_cv(canvas->getW(), canvas->getH());
         

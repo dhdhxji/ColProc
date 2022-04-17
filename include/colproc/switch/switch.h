@@ -4,7 +4,10 @@
 #include "colproc/colproc.h"
 #include "colproc/variable/variable.h"
 #include "colproc/switch/transition.h"
+#include "colproc/util/error.hpp"
 #include <vector>
+
+using namespace std::string_literals;
 
 class Switch: public ColProc {
 protected:
@@ -23,6 +26,13 @@ public:
         Variable<int32_t>* selector,
         Transition* transition
     ) {
+        for(int i = 0; i < inputs.size(); ++i) {
+            ERR_CHECK_NOT_NULL(inputs[i], "Switch: input ["s + std::to_string(i) + "] is NULL"s);
+        }
+
+        ERR_CHECK_NOT_NULL(selector, "Switch: selector is NULL");
+        ERR_CHECK_NOT_NULL(transition, "Switch: transition is NULL");
+
         _inputs = inputs;
         _selector = selector;
         _transition = transition;
@@ -35,6 +45,7 @@ public:
         uint32_t time,
         Canvas* canvas
     ) override {
+        ERR_CHECK_NOT_NULL(canvas, "Switch: canvas is NULL");
         ColProc* src = _getInput();
         if(src != _prev_select) {
             _transition->addTransition(_prev_select, src, time);

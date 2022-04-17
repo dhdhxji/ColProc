@@ -3,6 +3,7 @@
 
 #include "generator.h"
 #include "../util/util.h"
+#include "colproc/util/error.hpp"
 
 class GeneratorRainbow: public Generator
 {
@@ -12,6 +13,9 @@ public:
         Variable<int32_t>* angle,
         Variable<int32_t>* cycle_period_ms
     ) {
+        ERR_CHECK_NOT_NULL(length, "GeneratorRainbow: length is NULL");
+        ERR_CHECK_NOT_NULL(length, "GeneratorRainbow: length is NULL");
+        ERR_CHECK_NOT_NULL(length, "GeneratorRainbow: length is NULL");
         _length = length;
         _angle = angle;
         _cycle_period_ms = cycle_period_ms;
