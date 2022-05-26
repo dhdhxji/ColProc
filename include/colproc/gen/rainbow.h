@@ -14,8 +14,8 @@ public:
         Variable<int32_t>* cycle_period_ms
     ) {
         ERR_CHECK_NOT_NULL(length, "GeneratorRainbow: length is NULL");
-        ERR_CHECK_NOT_NULL(length, "GeneratorRainbow: length is NULL");
-        ERR_CHECK_NOT_NULL(length, "GeneratorRainbow: length is NULL");
+        ERR_CHECK_NOT_NULL(angle, "GeneratorRainbow: length is NULL");
+        ERR_CHECK_NOT_NULL(cycle_period_ms, "GeneratorRainbow: length is NULL");
         _length = length;
         _angle = angle;
         _cycle_period_ms = cycle_period_ms;
